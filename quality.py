@@ -16,6 +16,7 @@ def print_q(a):
     print_line("q5", q[4])
 
 
+# multiplication of the quality matrix
 def mul_q(inp, q):
     if len(inp) != 5:
         raise Exception("len(inp) != 5")
@@ -41,10 +42,11 @@ quality = {
     "Legendary": 2.50,
 }
 
-quality_tiers = {"T1": 0.0, "T2": 0.0, "T3": 2.5}
+quality_tiers = {"T1": 0.0, "T2": 0.0, "T3": 2.5}  # data for T0, T1 are unknown
 productivity_tiers = {"T1": 4.0, "T2": 6.0, "T3": 10.0}
 
 
+# constructor for the quality/productivity matrix
 def new_q(
     quality_amount,
     quality_tier,
@@ -135,6 +137,7 @@ print("==================")
 print_q(q1p3)
 
 
+# q_level - required output quality 0...4
 def get_the_ratio(x0, q_level, q1, q2, debug=False):
     mask_recycler = np.ones(5)
     mask_out = np.zeros(5)
@@ -156,6 +159,21 @@ def get_the_ratio(x0, q_level, q1, q2, debug=False):
         x12 = mul_q(x3, q2["matrix"])  # Q2
         x1 = x12 * mask_recycler  # sorting
         xout = (x2 + x12) * mask_out  # sorting
+
+        if False:
+            print()
+            print("==================")
+            print("q1 (assembly machine) = {}".format(q1["text"]))
+            print("q2 (recycler) = {}".format(q2["text"]))
+            print("tic = {}".format(tic))
+            print_line("x0 = ", x0)
+            print_line("x1 = ", x1)
+            print_line("x10= ", x10)
+            print_line("x2 = ", x2)
+            print_line("x3 = ", x3)
+            print_line("x12= ", x12)
+            print_line("x1 = ", x1)
+            print_line("xout ", xout)
 
         # has "xout" changed in the last tick?
         if np.array_equal(xout_0, xout):
@@ -185,6 +203,7 @@ def get_the_ratio_v2(x0, q_level, q1, q2):
     out = get_the_ratio(x0, q_level, q1, q2)
     x0 /= out[q_level]
     out = get_the_ratio(x0, q_level, q1, q2, True)
+    return out
 
 
 print()
@@ -197,4 +216,3 @@ q_level = 1
 out = get_the_ratio_v2([1.0, 0, 0, 0, 0], q_level, q4, q4)
 out = get_the_ratio_v2([1.0, 0, 0, 0, 0], q_level, q4Leg, q4Leg)
 out = get_the_ratio_v2([1.0, 0, 0, 0, 0], q_level, p4, q4)
-
