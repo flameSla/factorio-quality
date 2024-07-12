@@ -6,4 +6,4 @@ Q1, Q2 - blocks for calculating modules. Multiplies the quality/productivity mat
 
 Calculation of X0,X1...Xout:
 
-https://github.com/flameSla/factorio-quality/blob/main/quality.py#L153
+https://github.com/flameSla/factorio-quality/blob/main/quality.py#L156
