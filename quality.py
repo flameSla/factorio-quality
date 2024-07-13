@@ -4,6 +4,7 @@ from operator import itemgetter
 np.seterr(all="raise")
 
 
+# ====================================
 def print_line(text, inp, end=""):
     print(text, "".join("{:12.4f}".format(t) for t in inp), end)
 
@@ -19,6 +20,7 @@ def print_q(a):
     print_line("q5", q[4])
 
 
+# ====================================
 # multiplication of the quality matrix
 def mul_q(inp, q):
     if len(inp) != 5:
@@ -37,6 +39,7 @@ def mul_q(inp, q):
     return np.array(res, dtype="float64")
 
 
+# ====================================
 quality = {
     "Normal": 1.0,
     "Uncommon": 1.30,
@@ -118,57 +121,7 @@ def new_q(
     res[4][4] = 1
 
     res *= Pinp
-    # print_q(res)
     return {"text": text, "matrix": res}
-
-
-q1 = new_q(1, "T3", "Normal", 0, "", "")
-q1p1 = new_q(1, "T3", "Normal", 1, "T3", "Normal")
-q2 = new_q(2, "T3", "Normal", 0, "", "")
-q4 = new_q(4, "T3", "Normal", 0, "", "")
-q4Leg = new_q(4, "T3", "Legendary", 0, "", "")
-p4 = new_q(0, "", "", 4, "T3", "Normal")
-p4Leg = new_q(0, "", "", 4, "T3", "Legendary")
-q1p3 = new_q(1, "T3", "Normal", 3, "T3", "Normal")
-q2p2 = new_q(2, "T3", "Normal", 2, "T3", "Normal")
-q3p1 = new_q(3, "T3", "Normal", 1, "T3", "Normal")
-q1p3Leg = new_q(1, "T3", "Legendary", 3, "T3", "Legendary")
-q2p2Leg = new_q(2, "T3", "Legendary", 2, "T3", "Legendary")
-q3p1Leg = new_q(3, "T3", "Legendary", 1, "T3", "Legendary")
-p5Leg0 = new_q(0, "", "", 5, "T3", "Legendary", False)
-p5Leg1 = new_q(0, "", "", 5, "T3", "Legendary", True)
-
-# print()
-# print("==================")
-# print_q(p5Leg0)
-
-# print()
-# print("==================")
-# print_q(p5Leg1)
-
-# print()
-# print("==================")
-# print_q(q4)
-
-# print()
-# print("==================")
-# print_q(q4)
-
-# print()
-# print("==================")
-# print_q(q4Leg)
-
-# print()
-# print("==================")
-# print_q(p4)
-
-# print()
-# print("==================")
-# print_q(p4Leg)
-
-# print()
-# print("==================")
-# print_q(q1p3)
 
 
 def get_q_list(number_of_modules, tier, q_quality, additional50percent):
@@ -190,6 +143,7 @@ def get_q_list_Qonly(number_of_modules, tier, q_quality, additional50percent):
     return q_list
 
 
+# ====================================
 # q_level - required output quality 0...4
 def get_the_ratio(x0, q_level, q1, q2, debug=False, koeff=1.0):
     mask_recycler = np.ones(5, dtype="float64")
@@ -206,47 +160,17 @@ def get_the_ratio(x0, q_level, q1, q2, debug=False, koeff=1.0):
     xout_0 = np.zeros(5, dtype="float64")
     while True:
         tic += 1
-        x10 = (x0 + x1) / koeff  # assembly machine
-        x2 = mul_q(x10, q1["matrix"])  # Q1
-        x3 = x2 * 0.25 * koeff * mask_recycler  # recycler + sorting
-        x12 = mul_q(x3, q2["matrix"])  # Q2
-        x1 = x12 * mask_recycler  # sorting
         try:
+            x10 = (x0 + x1) / koeff  # assembly machine
+            x2 = mul_q(x10, q1["matrix"])  # Q1
+            x3 = x2 * 0.25 * koeff * mask_recycler  # recycler + sorting
+            x12 = mul_q(x3, q2["matrix"])  # Q2
+            x1 = x12 * mask_recycler  # sorting
             xout = (x2 + x12) * mask_out  # sorting
         except FloatingPointError:
-            print()
-            print("==================")
-            print("q1 (assembly machine) = {}".format(q1["text"]))
-            print("q2 (recycler) = {}".format(q2["text"]))
-            print("tic = ", type(tic), tic)
-            print("x2 = ", type(x2), x2)
-            print("x12 = ", type(x12), x12)
-            print("xout = ", type(xout), xout)
-            print(
-                "abs(xout_0[q_level] - xout[q_level]) = ",
-                type(abs(xout_0[q_level] - xout[q_level])),
-                abs(xout_0[q_level] - xout[q_level]),
-            )
-
             raise Exception("Positive feedback! The generator!")
 
-        if False:
-            print()
-            print("==================")
-            print("q1 (assembly machine) = {}".format(q1["text"]))
-            print("q2 (recycler) = {}".format(q2["text"]))
-            print("tic = {}".format(tic))
-            print_line("x0 = ", x0)
-            print_line("x1 = ", x1)
-            print_line("x10= ", x10)
-            print_line("x2 = ", x2)
-            print_line("x3 = ", x3)
-            print_line("x12= ", x12)
-            print_line("x1 = ", x1)
-            print_line("xout ", xout)
-
         # has "xout" changed in the last tick?
-        # if np.array_equal(xout_0, xout) and tic > 99 or xout[q_level] > 10.0:
         if abs(xout_0[q_level] - xout[q_level]) <= 0.000001 and tic > 99:
             break
         else:
@@ -278,6 +202,7 @@ def get_the_ratio_v2(x0, q_level, q1, q2, debug=True, koeff=1.0):
     return {"x0": x0, "out": out}
 
 
+# ====================================
 def make_a_complete_search(q_list1, q_list2=None, koeff=1.0):
     if q_list2 is None:
         q_list2 = q_list1
@@ -290,13 +215,13 @@ def make_a_complete_search(q_list1, q_list2=None, koeff=1.0):
                 )
             )
 
+    x0 = [1.0, 0, 0, 0, 0]
     res = [[], [], [], [], []]
     for q_level in range(1, 5):
-
         for q1 in range(len(q_list1)):
             for q2 in range(len(q_list2)):
                 out = get_the_ratio_v2(
-                    [1.0, 0, 0, 0, 0], q_level, q_list1[q1], q_list2[q2], False, koeff
+                    x0, q_level, q_list1[q1], q_list2[q2], False, koeff
                 )
                 if abs(out["out"][q_level] - 1.0) <= 0.1:
                     res[q_level].append(
@@ -324,40 +249,27 @@ def make_a_complete_search(q_list1, q_list2=None, koeff=1.0):
     return res
 
 
-# furnace
-# make_a_complete_search(
-#     get_q_list(2, "T3", "Normal", False), get_q_list(4, "T3", "Normal", False)
-# )
-
 # q = "Normal"
 # q = "Uncommon"
-# q = "Rare"
+q = "Rare"
 # q = "Epic"
 # q = "Legendary"
+
+# furnace
 # make_a_complete_search(
-#     get_q_list(4, "T3", q, False), get_q_list_Qonly(4, "T3", q, False)
+#     get_q_list(2, "T3", q, False), get_q_list_Qonly(4, "T3", q, False)
 # )
 
 make_a_complete_search(
-    get_q_list(5, "T3", "Legendary", True),
-    get_q_list_Qonly(4, "T3", "Legendary", False),
+    get_q_list(4, "T3", q, False), get_q_list_Qonly(4, "T3", q, False)
 )
 
+# make_a_complete_search(
+#     get_q_list(5, "T3", "Legendary", True),
+#     get_q_list_Qonly(4, "T3", "Legendary", False),
+# )
 
-# q1p2 = new_q(1, "T3", "Legendary", 2, "T3", "Legendary", False)
-# p5Leg1 = new_q(0, "", "", 5, "T3", "Legendary", True)
-
-# get_the_ratio_v2([1.0, 0, 0, 0, 0], 1, p5Leg1, q1p2)
-# get_the_ratio_v2([1.0, 0, 0, 0, 0], 2, p5Leg1, q1p2)
-# get_the_ratio_v2([1.0, 0, 0, 0, 0], 3, p5Leg1, q1p2)
-# get_the_ratio_v2([1.0, 0, 0, 0, 0], 4, p5Leg1, q1p2)
 
 # print()
 # print("==================")
-# print_q(new_q(1, "T3", "Legendary", 4, "T3", "Legendary", True))
-# print()
-# print("==================")
-# print_q(new_q(0, "", "", 5, "T3", "Legendary", True))
-# print()
-# print("==================")
-# print_q(new_q(0, "", "", 3, "T3", "Legendary", False))
+# print_q(new_q(3, "T3", "Rare", 0, "", "", False))
