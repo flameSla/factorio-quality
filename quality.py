@@ -183,8 +183,15 @@ def get_q_list(number_of_modules, tier, q_quality, additional50percent):
     return q_list
 
 
+def get_q_list_Qonly(number_of_modules, tier, q_quality, additional50percent):
+    q_list = []
+    for q in range(1, number_of_modules + 1):
+        q_list.append(new_q(q, tier, q_quality, 0, "", "", additional50percent))
+    return q_list
+
+
 # q_level - required output quality 0...4
-def get_the_ratio(x0, q_level, q1, q2, debug=False):
+def get_the_ratio(x0, q_level, q1, q2, debug=False, koeff=1.0):
     mask_recycler = np.ones(5, dtype="float64")
     mask_out = np.zeros(5, dtype="float64")
     for i in range(5):
@@ -199,9 +206,9 @@ def get_the_ratio(x0, q_level, q1, q2, debug=False):
     xout_0 = np.zeros(5, dtype="float64")
     while True:
         tic += 1
-        x10 = x0 + x1  # assembly machine
+        x10 = (x0 + x1) / koeff  # assembly machine
         x2 = mul_q(x10, q1["matrix"])  # Q1
-        x3 = x2 * 0.25 * mask_recycler  # recycler + sorting
+        x3 = x2 * 0.25 * koeff * mask_recycler  # recycler + sorting
         x12 = mul_q(x3, q2["matrix"])  # Q2
         x1 = x12 * mask_recycler  # sorting
         try:
@@ -221,7 +228,7 @@ def get_the_ratio(x0, q_level, q1, q2, debug=False):
                 abs(xout_0[q_level] - xout[q_level]),
             )
 
-            raise Exception("Stop")
+            raise Exception("Positive feedback! The generator!")
 
         if False:
             print()
@@ -240,11 +247,7 @@ def get_the_ratio(x0, q_level, q1, q2, debug=False):
 
         # has "xout" changed in the last tick?
         # if np.array_equal(xout_0, xout) and tic > 99 or xout[q_level] > 10.0:
-        if (
-            abs(xout_0[q_level] - xout[q_level]) <= 0.000001
-            and tic > 99
-            or xout[q_level] > 10.0
-        ):
+        if abs(xout_0[q_level] - xout[q_level]) <= 0.000001 and tic > 99:
             break
         else:
             xout_0 = xout
@@ -267,15 +270,15 @@ def get_the_ratio(x0, q_level, q1, q2, debug=False):
     return xout
 
 
-def get_the_ratio_v2(x0, q_level, q1, q2, debug=True):
-    out = get_the_ratio(x0, q_level, q1, q2)
+def get_the_ratio_v2(x0, q_level, q1, q2, debug=True, koeff=1.0):
+    out = get_the_ratio(x0, q_level, q1, q2, False, koeff)
     if out[q_level] > 0:
         x0 /= out[q_level]
-        out = get_the_ratio(x0, q_level, q1, q2, debug)
+        out = get_the_ratio(x0, q_level, q1, q2, debug, koeff)
     return {"x0": x0, "out": out}
 
 
-def make_a_complete_search(q_list1, q_list2=None):
+def make_a_complete_search(q_list1, q_list2=None, koeff=1.0):
     if q_list2 is None:
         q_list2 = q_list1
 
@@ -287,14 +290,15 @@ def make_a_complete_search(q_list1, q_list2=None):
                 )
             )
 
+    res = [[], [], [], [], []]
     for q_level in range(1, 5):
-        res = [[], [], [], [], []]
+
         for q1 in range(len(q_list1)):
             for q2 in range(len(q_list2)):
                 out = get_the_ratio_v2(
-                    [1.0, 0, 0, 0, 0], q_level, q_list1[q1], q_list2[q2], False
+                    [1.0, 0, 0, 0, 0], q_level, q_list1[q1], q_list2[q2], False, koeff
                 )
-                if out["out"][q_level] >= 0.9 and out["out"][q_level] <= 1.1:
+                if abs(out["out"][q_level] - 1.0) <= 0.1:
                     res[q_level].append(
                         [
                             out["x0"],
@@ -317,13 +321,27 @@ def make_a_complete_search(q_list1, q_list2=None):
         print("q_level = {}".format(q_level))
         print()
         print_res(res[q_level], q_level)
+    return res
 
 
-# make_a_complete_search(get_q_list(4, "T3", "Normal", False))
-make_a_complete_search(get_q_list(4, "T3", "Legendary", False))
+# furnace
 # make_a_complete_search(
-#     get_q_list(5, "T3", "Legendary", True), get_q_list(4, "T3", "Legendary", False)
+#     get_q_list(2, "T3", "Normal", False), get_q_list(4, "T3", "Normal", False)
 # )
+
+# q = "Normal"
+# q = "Uncommon"
+# q = "Rare"
+# q = "Epic"
+# q = "Legendary"
+# make_a_complete_search(
+#     get_q_list(4, "T3", q, False), get_q_list_Qonly(4, "T3", q, False)
+# )
+
+make_a_complete_search(
+    get_q_list(5, "T3", "Legendary", True),
+    get_q_list_Qonly(4, "T3", "Legendary", False),
+)
 
 
 # q1p2 = new_q(1, "T3", "Legendary", 2, "T3", "Legendary", False)
@@ -333,3 +351,13 @@ make_a_complete_search(get_q_list(4, "T3", "Legendary", False))
 # get_the_ratio_v2([1.0, 0, 0, 0, 0], 2, p5Leg1, q1p2)
 # get_the_ratio_v2([1.0, 0, 0, 0, 0], 3, p5Leg1, q1p2)
 # get_the_ratio_v2([1.0, 0, 0, 0, 0], 4, p5Leg1, q1p2)
+
+# print()
+# print("==================")
+# print_q(new_q(1, "T3", "Legendary", 4, "T3", "Legendary", True))
+# print()
+# print("==================")
+# print_q(new_q(0, "", "", 5, "T3", "Legendary", True))
+# print()
+# print("==================")
+# print_q(new_q(0, "", "", 3, "T3", "Legendary", False))
