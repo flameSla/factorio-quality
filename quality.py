@@ -150,12 +150,10 @@ class scheme_1:
 
     def clear(self, q_level):
         self.x1 = np.zeros(5, dtype="float64")
-        self.mask_recycler = np.ones(5, dtype="float64")
-        self.mask_out = np.zeros(5, dtype="float64")
-        for i in range(5):
-            if i >= q_level:
-                self.mask_recycler[i] = 0
-                self.mask_out[i] = 1.0
+        self.mask_recycler = np.zeros(5, dtype="float64")
+        self.mask_out = np.ones(5, dtype="float64")
+        self.mask_recycler[:q_level] = 1.0
+        self.mask_out[:q_level] = 0.0
 
     def calc(self, x0, q_list):
         self.x10 = x0 + self.x1  # assembly machine
@@ -190,12 +188,10 @@ class scheme_2:
 
     def clear(self, q_level):
         self.x1 = np.zeros(5, dtype="float64")
-        self.mask_recycler = np.ones(5, dtype="float64")
-        self.mask_out = np.zeros(5, dtype="float64")
-        for i in range(5):
-            if i >= q_level:
-                self.mask_recycler[i] = 0
-                self.mask_out[i] = 1.0
+        self.mask_recycler = np.zeros(5, dtype="float64")
+        self.mask_out = np.ones(5, dtype="float64")
+        self.mask_recycler[:q_level] = 1.0
+        self.mask_out[:q_level] = 0.0
 
     def calc(self, x0, q_list):
         self.x01 = mul_q(x0, q_list[0]["matrix"])  # Q0 - mining drill
@@ -269,12 +265,16 @@ def make_a_complete_search(x0, scheme, name_of_the_machines, q_list, q_level_lis
         for q in product(*q_list):
             out = get_the_ratio_v2(list(x0), scheme, q_level, q, False)
             if abs(out["out"][q_level] - 1.0) <= 0.1:
-                list_of_machines = ""
-                for i in range(len(q)):
-                    list_of_machines += " {} = {:<27s}".format(
-                        name_of_the_machines[i], q[i]["text"]
-                    )
-                res[q_level].append([out["x0"], out["out"], list_of_machines])
+                res[q_level].append(
+                    [
+                        out["x0"],
+                        out["out"],
+                        "".join(
+                            " {} = {:<27s}".format(a, b["text"])
+                            for a, b in zip(name_of_the_machines, q)
+                        ),
+                    ]
+                )
             else:
                 print(
                     "\t{} -> out = {}".format(
