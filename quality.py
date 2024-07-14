@@ -1,4 +1,5 @@
 import numpy as np
+from itertools import product
 
 np.seterr(all="raise")
 
@@ -141,99 +142,146 @@ def get_q_list_Qonly(number_of_modules, tier, q_quality, additional50percent):
     return q_list
 
 
+class scheme_1:
+    """assembly machine + recycler"""
+
+    def __init__(self):
+        pass
+
+    def clear(self, q_level):
+        self.x1 = np.zeros(5, dtype="float64")
+        self.mask_recycler = np.ones(5, dtype="float64")
+        self.mask_out = np.zeros(5, dtype="float64")
+        for i in range(5):
+            if i >= q_level:
+                self.mask_recycler[i] = 0
+                self.mask_out[i] = 1.0
+
+    def calc(self, x0, q_list):
+        self.x10 = x0 + self.x1  # assembly machine
+        self.x2 = mul_q(self.x10, q_list[0]["matrix"])  # Q1
+        self.x3 = self.x2 * 0.25 * self.mask_recycler  # recycler + sorting
+        self.x12 = mul_q(self.x3, q_list[1]["matrix"])  # Q2
+        self.x1 = self.x12 * self.mask_recycler  # sorting
+        self.xout = (self.x2 + self.x12) * self.mask_out  # sorting
+        return self.xout
+
+    def print(self, x0, q_list, tic):
+        print()
+        print("==================")
+        print("q1 (assembly machine) = {}".format(q_list[0]["text"]))
+        print("q2 (recycler) = {}".format(q_list[1]["text"]))
+        print("tic = {}".format(tic))
+        print_line("x0 = ", x0, "{:12.4f}".format(sum(x0)))
+        print_line("x1 = ", self.x1)
+        print_line("x10= ", self.x10)
+        print_line("x2 = ", self.x2)
+        print_line("x3 = ", self.x3)
+        print_line("x12= ", self.x12)
+        print_line("x1 = ", self.x1)
+        print_line("xout ", self.xout)
+
+
+class scheme_2:
+    """mining drill + assembly machine + recycler"""
+
+    def __init__(self):
+        pass
+
+    def clear(self, q_level):
+        self.x1 = np.zeros(5, dtype="float64")
+        self.mask_recycler = np.ones(5, dtype="float64")
+        self.mask_out = np.zeros(5, dtype="float64")
+        for i in range(5):
+            if i >= q_level:
+                self.mask_recycler[i] = 0
+                self.mask_out[i] = 1.0
+
+    def calc(self, x0, q_list):
+        self.x01 = mul_q(x0, q_list[0]["matrix"])  # Q0 - mining drill
+        self.x10 = self.x01 + self.x1  # assembly machine
+        self.x2 = mul_q(self.x10, q_list[1]["matrix"])  # Q1
+        self.x3 = self.x2 * 0.25 * self.mask_recycler  # recycler + sorting
+        self.x12 = mul_q(self.x3, q_list[2]["matrix"])  # Q2
+        self.x1 = self.x12 * self.mask_recycler  # sorting
+        self.xout = (self.x2 + self.x12) * self.mask_out  # sorting
+        return self.xout
+
+    def print(self, x0, q_list, tic):
+        print()
+        print("==================")
+        print("q1 (assembly machine) = {}".format(q_list[0]["text"]))
+        print("q2 (recycler) = {}".format(q_list[1]["text"]))
+        print("tic = {}".format(tic))
+        print_line("x0 = ", x0)
+        print_line("x01 = ", self.x01)
+        print_line("x1 = ", self.x1)
+        print_line("x10= ", self.x10)
+        print_line("x2 = ", self.x2)
+        print_line("x3 = ", self.x3)
+        print_line("x12= ", self.x12)
+        print_line("x1 = ", self.x1)
+        print_line("xout ", self.xout)
+
+
 # ====================================
 # q_level - required output quality 0...4
-def get_the_ratio(x0, q_level, q_list, debug=False, koeff=1.0):
-    mask_recycler = np.ones(5, dtype="float64")
-    mask_out = np.zeros(5, dtype="float64")
-    for i in range(5):
-        if i >= q_level:
-            mask_recycler[i] = 0
-            mask_out[i] = 1.0
-    # print_line("mask_recycler", mask_recycler)
-    # print_line("mask_out     ", mask_out)
+def get_the_ratio(x0, scheme, q_level, q_list, debug):
+    scheme.clear(q_level)
 
     tic = -1
-    x1 = np.zeros(5, dtype="float64")
-    xout_0 = np.zeros(5, dtype="float64")
+    xout_last = np.zeros(5, dtype="float64")
     while True:
         tic += 1
         try:
-            x10 = (x0 + x1) / koeff  # assembly machine
-            x2 = mul_q(x10, q_list[0]["matrix"])  # Q1
-            x3 = x2 * 0.25 * koeff * mask_recycler  # recycler + sorting
-            x12 = mul_q(x3, q_list[1]["matrix"])  # Q2
-            x1 = x12 * mask_recycler  # sorting
-            xout = (x2 + x12) * mask_out  # sorting
+            xout = scheme.calc(x0, q_list)
         except FloatingPointError:
             raise Exception("Positive feedback! The generator!")
 
         # has "xout" changed in the last tick?
-        if abs(xout_0[q_level] - xout[q_level]) <= 0.000001 and tic > 99:
+        if abs(xout_last[q_level] - xout[q_level]) <= 0.000001 and tic > 99:
             break
         else:
-            xout_0 = xout
+            xout_last = xout
 
     if debug:
-        print()
-        print("==================")
-        print("q1 (assembly machine) = {}".format(q1["text"]))
-        print("q2 (recycler) = {}".format(q2["text"]))
-        print("tic = {}".format(tic))
-        print_line("x0 = ", x0, "{:12.4f}".format(sum(x0)))
-        print_line("x1 = ", x1)
-        print_line("x10= ", x10)
-        print_line("x2 = ", x2)
-        print_line("x3 = ", x3)
-        print_line("x12= ", x12)
-        print_line("x1 = ", x1)
-        print_line("xout ", xout)
+        scheme.print(x0, q_list, tic)
 
     return xout
 
 
-def get_the_ratio_v2(x0, q_level, q_list, debug=True, koeff=1.0):
-    out = get_the_ratio(x0, q_level, q_list, False, koeff)
+def get_the_ratio_v2(x0, scheme, q_level, q_list, debug):
+    out = get_the_ratio(x0, scheme, q_level, q_list, False)
     if out[q_level] > 0:
         x0 /= out[q_level]
-        out = get_the_ratio(x0, q_level, q_list, debug, koeff)
+        out = get_the_ratio(x0, scheme, q_level, q_list, debug)
     return {"x0": x0, "out": out}
 
 
 # ====================================
-def make_a_complete_search(x0, q_list, q_level_list, koeff=1.0):
+def make_a_complete_search(x0, scheme, name_of_the_machines, q_list, q_level_list):
     def print_res(res, q_level):
         for r in sorted(res, key=lambda elem: elem[0][0]):
-            print(
-                "in:{:12.4f} out:{:>5.2f} assembly machine = {:<27s} recycler = {:<27s}".format(
-                    r[0][0], r[1][q_level], r[2], r[3]
-                )
-            )
+            print("in:{:12.4f} out:{:>5.2f} {:}".format(r[0][0], r[1][q_level], r[2]))
 
     res = [[], [], [], [], []]
     for q_level in q_level_list:
-        for q1 in range(len(q_list[0])):
-            for q2 in range(len(q_list[1])):
-                out = get_the_ratio_v2(
-                    list(x0), q_level, [q_list[0][q1], q_list[1][q2]], False, koeff
+        for q in product(*q_list):
+            out = get_the_ratio_v2(list(x0), scheme, q_level, q, False)
+            if abs(out["out"][q_level] - 1.0) <= 0.1:
+                list_of_machines = ""
+                for i in range(len(q)):
+                    list_of_machines += " {} = {:<27s}".format(
+                        name_of_the_machines[i], q[i]["text"]
+                    )
+                res[q_level].append([out["x0"], out["out"], list_of_machines])
+            else:
+                print(
+                    "\t{} -> out = {}".format(
+                        "".join("{:<27s}".format(t["text"]) for t in q),
+                        out["out"][q_level],
+                    )
                 )
-                if abs(out["out"][q_level] - 1.0) <= 0.1:
-                    res[q_level].append(
-                        [
-                            out["x0"],
-                            out["out"],
-                            q_list[0][q1]["text"],
-                            q_list[1][q2]["text"],
-                        ]
-                    )
-                else:
-                    print(
-                        "\t{} {} -> out = {}".format(
-                            q_list[0][q1]["text"],
-                            q_list[1][q2]["text"],
-                            out["out"][q_level],
-                        )
-                    )
 
         print()
         print("==================")
@@ -251,14 +299,18 @@ q = "Normal"
 
 print()
 print("==================")
-print("furnace")
+print("mining drill + furnace")
 print()
-x0 = new_q(3, "T3", q, 0, "", "", False)["matrix"][0]
-print_line("", x0)
 make_a_complete_search(
-    x0,
-    [get_q_list(2, "T3", q, False), get_q_list_Qonly(4, "T3", q, False)],
-    (1, 2),
+    [1.0, 0, 0, 0, 0],
+    scheme_2(),
+    ("mining drill", "furnace", "recycler"),
+    [
+        get_q_list_Qonly(3, "T3", q, False),
+        get_q_list(2, "T3", q, False),
+        get_q_list_Qonly(4, "T3", q, False),
+    ],
+    q_level_list=(1, 2),
 )
 
 print()
@@ -267,8 +319,10 @@ print("assembly machine")
 print()
 make_a_complete_search(
     [1.0, 0, 0, 0, 0],
+    scheme_1(),
+    ("assembly machine", "recycler"),
     [get_q_list(4, "T3", q, False), get_q_list_Qonly(4, "T3", q, False)],
-    (1, 2),
+    q_level_list=(1, 2),
 )
 
 # make_a_complete_search(
@@ -280,3 +334,15 @@ make_a_complete_search(
 # print()
 # print("==================")
 # print(new_q(3, "T3", "Normal", 0, "", "", False))
+
+# get_the_ratio(
+#     [30.2777, 0, 0, 0, 0],
+#     scheme_2(),
+#     1,
+#     (
+#         new_q(0, "", "", 0, "", "", False),
+#         new_q(1, "T3", "Normal", 0, "", "", False),
+#         new_q(0, "", "", 0, "", "", False),
+#     ),
+#     True,
+# )
