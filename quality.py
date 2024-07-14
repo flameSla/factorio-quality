@@ -1,5 +1,4 @@
 import numpy as np
-from operator import itemgetter
 
 np.seterr(all="raise")
 
@@ -72,7 +71,7 @@ def new_q(
         text_Q = "{}xQ-{}'{}' ".format(
             quality_amount,
             quality_tier,
-            quality_quality,
+            quality_quality[:3],
         )
     else:
         Qinp = 0
@@ -88,7 +87,7 @@ def new_q(
         text_P = "{}xP-{}'{}' ".format(
             productivity_amount,
             productivity_tier,
-            productivity_quality,
+            productivity_quality[:3],
         )
     else:
         Pinp = 1.0
@@ -129,7 +128,6 @@ def get_q_list(number_of_modules, tier, q_quality, additional50percent):
     for q in range(0, number_of_modules + 1):
         for p in range(0, number_of_modules + 1):
             if q + p <= number_of_modules and q + p > 0:
-                # print("q={}\tp={}".format(q, p))
                 q_list.append(
                     new_q(q, tier, q_quality, p, tier, q_quality, additional50percent)
                 )
@@ -138,20 +136,20 @@ def get_q_list(number_of_modules, tier, q_quality, additional50percent):
 
 def get_q_list_Qonly(number_of_modules, tier, q_quality, additional50percent):
     q_list = []
-    for q in range(1, number_of_modules + 1):
+    for q in range(0, number_of_modules + 1):
         q_list.append(new_q(q, tier, q_quality, 0, "", "", additional50percent))
     return q_list
 
 
 # ====================================
 # q_level - required output quality 0...4
-def get_the_ratio(x0, q_level, q1, q2, debug=False, koeff=1.0):
+def get_the_ratio(x0, q_level, q_list, debug=False, koeff=1.0):
     mask_recycler = np.ones(5, dtype="float64")
     mask_out = np.zeros(5, dtype="float64")
     for i in range(5):
         if i >= q_level:
             mask_recycler[i] = 0
-            mask_out[i] = 1
+            mask_out[i] = 1.0
     # print_line("mask_recycler", mask_recycler)
     # print_line("mask_out     ", mask_out)
 
@@ -162,9 +160,9 @@ def get_the_ratio(x0, q_level, q1, q2, debug=False, koeff=1.0):
         tic += 1
         try:
             x10 = (x0 + x1) / koeff  # assembly machine
-            x2 = mul_q(x10, q1["matrix"])  # Q1
+            x2 = mul_q(x10, q_list[0]["matrix"])  # Q1
             x3 = x2 * 0.25 * koeff * mask_recycler  # recycler + sorting
-            x12 = mul_q(x3, q2["matrix"])  # Q2
+            x12 = mul_q(x3, q_list[1]["matrix"])  # Q2
             x1 = x12 * mask_recycler  # sorting
             xout = (x2 + x12) * mask_out  # sorting
         except FloatingPointError:
@@ -194,49 +192,45 @@ def get_the_ratio(x0, q_level, q1, q2, debug=False, koeff=1.0):
     return xout
 
 
-def get_the_ratio_v2(x0, q_level, q1, q2, debug=True, koeff=1.0):
-    out = get_the_ratio(x0, q_level, q1, q2, False, koeff)
+def get_the_ratio_v2(x0, q_level, q_list, debug=True, koeff=1.0):
+    out = get_the_ratio(x0, q_level, q_list, False, koeff)
     if out[q_level] > 0:
         x0 /= out[q_level]
-        out = get_the_ratio(x0, q_level, q1, q2, debug, koeff)
+        out = get_the_ratio(x0, q_level, q_list, debug, koeff)
     return {"x0": x0, "out": out}
 
 
 # ====================================
-def make_a_complete_search(q_list1, q_list2=None, koeff=1.0):
-    if q_list2 is None:
-        q_list2 = q_list1
-
+def make_a_complete_search(x0, q_list, q_level_list, koeff=1.0):
     def print_res(res, q_level):
         for r in sorted(res, key=lambda elem: elem[0][0]):
             print(
-                "in:{:12.4f} out:{:12.4f} assembly machine = {:<40s} recycler = {:<40s}".format(
+                "in:{:12.4f} out:{:>5.2f} assembly machine = {:<27s} recycler = {:<27s}".format(
                     r[0][0], r[1][q_level], r[2], r[3]
                 )
             )
 
-    x0 = [1.0, 0, 0, 0, 0]
     res = [[], [], [], [], []]
-    for q_level in range(1, 5):
-        for q1 in range(len(q_list1)):
-            for q2 in range(len(q_list2)):
+    for q_level in q_level_list:
+        for q1 in range(len(q_list[0])):
+            for q2 in range(len(q_list[1])):
                 out = get_the_ratio_v2(
-                    x0, q_level, q_list1[q1], q_list2[q2], False, koeff
+                    list(x0), q_level, [q_list[0][q1], q_list[1][q2]], False, koeff
                 )
                 if abs(out["out"][q_level] - 1.0) <= 0.1:
                     res[q_level].append(
                         [
                             out["x0"],
                             out["out"],
-                            q_list1[q1]["text"],
-                            q_list2[q2]["text"],
+                            q_list[0][q1]["text"],
+                            q_list[1][q2]["text"],
                         ]
                     )
                 else:
                     print(
                         "\t{} {} -> out = {}".format(
-                            q_list1[q1]["text"],
-                            q_list2[q2]["text"],
+                            q_list[0][q1]["text"],
+                            q_list[1][q2]["text"],
                             out["out"][q_level],
                         )
                     )
@@ -249,19 +243,32 @@ def make_a_complete_search(q_list1, q_list2=None, koeff=1.0):
     return res
 
 
-# q = "Normal"
+q = "Normal"
 # q = "Uncommon"
-q = "Rare"
+# q = "Rare"
 # q = "Epic"
 # q = "Legendary"
 
-# furnace
-# make_a_complete_search(
-#     get_q_list(2, "T3", q, False), get_q_list_Qonly(4, "T3", q, False)
-# )
-
+print()
+print("==================")
+print("furnace")
+print()
+x0 = new_q(3, "T3", q, 0, "", "", False)["matrix"][0]
+print_line("", x0)
 make_a_complete_search(
-    get_q_list(4, "T3", q, False), get_q_list_Qonly(4, "T3", q, False)
+    x0,
+    [get_q_list(2, "T3", q, False), get_q_list_Qonly(4, "T3", q, False)],
+    (1, 2),
+)
+
+print()
+print("==================")
+print("assembly machine")
+print()
+make_a_complete_search(
+    [1.0, 0, 0, 0, 0],
+    [get_q_list(4, "T3", q, False), get_q_list_Qonly(4, "T3", q, False)],
+    (1, 2),
 )
 
 # make_a_complete_search(
@@ -272,4 +279,4 @@ make_a_complete_search(
 
 # print()
 # print("==================")
-# print_q(new_q(3, "T3", "Rare", 0, "", "", False))
+# print(new_q(3, "T3", "Normal", 0, "", "", False))
