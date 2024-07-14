@@ -18,8 +18,8 @@ np.seterr(all="raise")
 
 # ====================================
 # q_level - required output quality 0...4
-def get_the_ratio_v2(x0, scheme, q_level, q_list, debug):
-    def get_the_ratio(x0, scheme, q_level, q_list, debug):
+def get_the_ratio_v2(x0, scheme, q_level, q_list, debug, log=False):
+    def get_the_ratio(x0, scheme, q_level, q_list, debug, log):
         scheme.clear(q_level)
 
         tic = -1
@@ -30,6 +30,9 @@ def get_the_ratio_v2(x0, scheme, q_level, q_list, debug):
                 xout = scheme.calc(x0, q_list)
             except FloatingPointError:
                 raise Exception("Positive feedback! The generator!")
+
+            if log and tic < 30:
+                scheme.print(x0, q_list, tic)
 
             # has "xout" changed in the last tick?
             if abs(xout_last[q_level] - xout[q_level]) <= 0.000001 and tic > 99:
@@ -42,19 +45,25 @@ def get_the_ratio_v2(x0, scheme, q_level, q_list, debug):
 
         return xout
 
-    out = get_the_ratio(x0, scheme, q_level, q_list, False)
+    out = get_the_ratio(x0, scheme, q_level, q_list, False, False)
     if out[q_level] > 0:
         x0 /= out[q_level]
-        out = get_the_ratio(x0, scheme, q_level, q_list, debug)
+        out = get_the_ratio(x0, scheme, q_level, q_list, debug, log)
     return {"x0": x0, "out": out}
 
 
 # ====================================
 def make_a_complete_search(x0, scheme, name_of_the_machines, q_list, q_level_list):
+    s_level = [x > 0 for x in x0].index(True)
+
     def print_res(res, q_level):
         # max_word = max(words, key=len)
-        for r in sorted(res, key=lambda elem: elem[0][0]):
-            print("in:{:12.4f} out:{:>5.2f} {:}".format(r[0][0], r[1][q_level], r[2]))
+        for r in sorted(res, key=lambda elem: elem[0][s_level]):
+            print(
+                "in:{:12.4f} out:{:>5.2f} {:}".format(
+                    r[0][s_level], r[1][q_level], r[2]
+                )
+            )
 
     res = [[], [], [], [], []]
     for q_level in q_level_list:
@@ -106,7 +115,7 @@ make_a_complete_search(
         get_q_list(2, "T3", q, False),
         get_q_list_Qonly(4, "T3", q, False),
     ],
-    q_level_list=(1, 2),
+    q_level_list=[1, 2],
 )
 
 print()
@@ -118,7 +127,7 @@ make_a_complete_search(
     scheme_1(),
     ("assembly machine", "recycler"),
     [get_q_list(4, "T3", q, False), get_q_list_Qonly(4, "T3", q, False)],
-    q_level_list=(1, 2),
+    q_level_list=[1, 2],
 )
 
 # make_a_complete_search(
@@ -131,14 +140,14 @@ make_a_complete_search(
 # print("==================")
 # print(new_q(3, "T3", "Normal", 0, "", "", False))
 
-# get_the_ratio(
-#     [30.2777, 0, 0, 0, 0],
-#     scheme_2(),
-#     1,
-#     (
-#         new_q(0, "", "", 0, "", "", False),
-#         new_q(1, "T3", "Normal", 0, "", "", False),
-#         new_q(0, "", "", 0, "", "", False),
-#     ),
-#     True,
-# )
+m = new_q(4, "T3", "Normal", 0, "", "", False)
+get_the_ratio_v2(
+    [1, 0, 0, 0, 0],
+    scheme_1(),
+    4,
+    (
+        m,
+        m,
+    ),
+    True,
+)
