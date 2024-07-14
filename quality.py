@@ -257,6 +257,7 @@ def get_the_ratio_v2(x0, scheme, q_level, q_list, debug):
 # ====================================
 def make_a_complete_search(x0, scheme, name_of_the_machines, q_list, q_level_list):
     def print_res(res, q_level):
+        # max_word = max(words, key=len)
         for r in sorted(res, key=lambda elem: elem[0][0]):
             print("in:{:12.4f} out:{:>5.2f} {:}".format(r[0][0], r[1][q_level], r[2]))
 
