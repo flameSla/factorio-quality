@@ -10,6 +10,7 @@ quality = {
 
 quality_tiers = {"T1": 0.0, "T2": 0.0, "T3": 2.5}  # data for T0, T1 are unknown
 productivity_tiers = {"T1": 4.0, "T2": 6.0, "T3": 10.0}
+speed_tiers = {"T1": 20.0, "T2": 30.0, "T3": 50.0}
 
 
 # ====================================
@@ -123,6 +124,14 @@ def get_q_list_Qonly(number_of_modules, tier, q_quality, additional50percent):
     return q_list
 
 
+# ====================================
+def get_q_list_Ponly(number_of_modules, tier, q_quality, additional50percent):
+    q_list = []
+    for p in range(0, number_of_modules + 1):
+        q_list.append(new_q(0, "", "", p, tier, q_quality, additional50percent))
+    return q_list
+
+
 ######################################
 #
 # main
@@ -133,3 +142,8 @@ if __name__ == "__main__":
         if hasattr(obj, "__class__") and obj.__class__.__name__ == "function"
     ]
     print(func_list)
+
+    for t in ("T1", "T2", "T3"):
+        print("====================================")
+        for q in quality.keys():
+            print("{} {:15s} = {:10.2f}".format(t, q, speed_tiers[t] * quality[q]))
