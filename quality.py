@@ -5,6 +5,7 @@ from modules import mul_q
 from modules import new_q
 from modules import get_q_list
 from modules import get_q_list_Qonly
+from modules import get_q_list_Ponly
 
 from utilities import print_line
 from utilities import print_q
@@ -26,13 +27,15 @@ def get_the_ratio_v2(x0, scheme, q_level, q_list, debug, log=False):
         xout_last = np.zeros(5, dtype="float64")
         while True:
             tic += 1
+            if log and tic < 30:
+                scheme.print0(x0, q_list, tic)
             try:
                 xout = scheme.calc(x0, q_list)
             except FloatingPointError:
                 raise Exception("Positive feedback! The generator!")
 
             if log and tic < 30:
-                scheme.print(x0, q_list, tic)
+                scheme.print1(x0, q_list, tic)
 
             # has "xout" changed in the last tick?
             if abs(xout_last[q_level] - xout[q_level]) <= 0.000001 and tic > 99:
@@ -41,7 +44,8 @@ def get_the_ratio_v2(x0, scheme, q_level, q_list, debug, log=False):
                 xout_last = xout
 
         if debug:
-            scheme.print(x0, q_list, tic)
+            scheme.print0(x0, q_list, tic)
+            scheme.print1(x0, q_list, tic)
 
         return xout
 
@@ -58,12 +62,15 @@ def make_a_complete_search(x0, scheme, name_of_the_machines, q_list, q_level_lis
 
     def print_res(res, q_level):
         # max_word = max(words, key=len)
-        for r in sorted(res, key=lambda elem: elem[0][s_level]):
+        for i, r in enumerate(sorted(res, key=lambda elem: elem[0][s_level])):
             print(
-                "in:{:12.4f} out:{:>5.2f} {:}".format(
-                    r[0][s_level], r[1][q_level], r[2]
+                "{:5d} in:{:12.4f} out:{:>5.2f} {:}".format(
+                    i, r[0][s_level], r[1][q_level], r[2]
                 )
             )
+            if i > 10:
+                print("  ...")
+                break
 
     res = [[], [], [], [], []]
     for q_level in q_level_list:
@@ -109,11 +116,12 @@ print()
 make_a_complete_search(
     [1.0, 0, 0, 0, 0],
     scheme_2(),
-    ("mining drill", "furnace", "recycler"),
+    ("drill", "furn", "rec", "machine"),
     [
         get_q_list_Qonly(3, "T3", q, False),
         get_q_list(2, "T3", q, False),
         get_q_list_Qonly(4, "T3", q, False),
+        get_q_list_Ponly(4, "T3", q, False),
     ],
     q_level_list=[1, 2],
 )
@@ -140,14 +148,49 @@ make_a_complete_search(
 # print("==================")
 # print(new_q(3, "T3", "Normal", 0, "", "", False))
 
+q = "Normal"
+q = "Rare"
 m = new_q(4, "T3", "Normal", 0, "", "", False)
 get_the_ratio_v2(
     [1, 0, 0, 0, 0],
-    scheme_1(),
+    scheme_2(),
     4,
     (
-        m,
-        m,
+        new_q(3, "T3", q, 0, "", "", False),
+        new_q(2, "T3", q, 0, "", "", False),
+        new_q(4, "T3", q, 0, "", "", False),
+        new_q(0, "", "", 4, "T3", q, False),
     ),
     True,
+    log=False,
+)
+
+m = new_q(4, "T3", q, 0, "", "", False)
+get_the_ratio_v2(
+    [1, 0, 0, 0, 0],
+    scheme_2(),
+    1,
+    (
+        new_q(3, "T3", q, 0, "", "", False),
+        new_q(0, "", "", 2, "T3", q, False),
+        new_q(0, "", "", 0, "", "", False),
+        new_q(0, "", "", 4, "T3", q, False),
+    ),
+    True,
+    log=False,
+)
+
+m = new_q(4, "T3", q, 0, "", "", False)
+get_the_ratio_v2(
+    [1, 0, 0, 0, 0],
+    scheme_2(),
+    1,
+    (
+        new_q(3, "T3", q, 0, "", "", False),
+        new_q(0, "", "", 2, "T3", q, False),
+        new_q(4, "T3", q, 0, "", "", False),
+        new_q(0, "", "", 4, "T3", q, False),
+    ),
+    True,
+    log=False,
 )
