@@ -12,6 +12,11 @@ quality_tiers = {"T1": 0.0, "T2": 0.0, "T3": 2.5}  # data for T0, T1 are unknown
 productivity_tiers = {"T1": 4.0, "T2": 6.0, "T3": 10.0}
 speed_tiers = {"T1": 20.0, "T2": 30.0, "T3": 50.0}
 
+# iron + copper
+cost_of_production = {
+    "Normal": {"T1": 7.228 + 11.996, "T2": 81.983 + 114.926, "T3": 462.987 + 641.573}
+}
+
 
 # ====================================
 # multiplication of the quality matrix
@@ -147,3 +152,12 @@ if __name__ == "__main__":
         print("====================================")
         for q in quality.keys():
             print("{} {:15s} = {:10.2f}".format(t, q, speed_tiers[t] * quality[q]))
+
+    print()
+    print('==================')
+    print('cost_of_production')
+    print()
+
+    print("T3 / T1 = {:10.2f}".format(cost_of_production["Normal"]["T3"]/cost_of_production["Normal"]["T1"]))
+    print("T3 / T2 = {:10.2f}".format(cost_of_production["Normal"]["T3"]/cost_of_production["Normal"]["T2"]))
+    print("T2 / T1 = {:10.2f}".format(cost_of_production["Normal"]["T2"]/cost_of_production["Normal"]["T1"]))
