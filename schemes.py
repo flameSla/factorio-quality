@@ -23,7 +23,8 @@ class scheme_1:
         self.x3 = self.x2 * 0.25 * self.mask_recycler  # recycler + sorting
         self.x12 = mul_q(self.x3, q_list[1]["matrix"])  # Q2
         self.x1 = self.x12 * self.mask_recycler  # sorting
-        self.xout = (self.x2 + self.x12) * self.mask_out  # sorting
+        self.x13 = mul_q(self.x12 * self.mask_out, q_list[2]["matrix"])
+        self.xout = self.x2 * self.mask_out + self.x13  # sorting
         return self.xout
 
     def print0(self, x0, q_list, tic):
@@ -41,6 +42,7 @@ class scheme_1:
         print_line("x3 = ", self.x3)
         print_line("x12= ", self.x12)
         print_line("x1 = ", self.x1)
+        print_line("x13= ", self.x13)
         print_line("xout ", self.xout)
 
 
@@ -65,10 +67,11 @@ class scheme_2:
         self.x4 = mul_q(self.x3, q_list[1]["matrix"])  # Q1
         self.x5 = self.x4 * 0.25 * self.mask_recycler  # recycler + sorting
         self.x6 = mul_q(self.x5, q_list[2]["matrix"])  # Q2
+        self.x7 = mul_q(self.x6 * self.mask_out, q_list[3]["matrix"])
         self.x2 = self.x6 * self.mask_recycler  # sorting
-        self.x10 = (self.x4 + self.x6) * self.mask_out  # sorting
+        self.x10 = self.x4 * self.mask_out + self.x7  # sorting
         self.x11 = self.x10  # assembly machine
-        self.xout = mul_q(self.x11, q_list[3]["matrix"])  # Q4
+        self.xout = mul_q(self.x11, q_list[4]["matrix"])  # Q4
         return self.xout
 
     def print0(self, x0, q_list, tic):
@@ -88,6 +91,7 @@ class scheme_2:
         print_line("x4 = ", self.x4)
         print_line("x5 = ", self.x5)
         print_line("x6 = ", self.x6)
+        print_line("x7 = ", self.x7)
         print_line("x2 = ", self.x2)
         print_line("x10= ", self.x10)
         print_line("xout ", self.xout)
