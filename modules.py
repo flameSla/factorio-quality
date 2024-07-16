@@ -154,10 +154,34 @@ if __name__ == "__main__":
             print("{} {:15s} = {:10.2f}".format(t, q, speed_tiers[t] * quality[q]))
 
     print()
-    print('==================')
-    print('cost_of_production')
+    print("==================")
+    print("cost_of_production")
     print()
 
-    print("T3 / T1 = {:10.2f}".format(cost_of_production["Normal"]["T3"]/cost_of_production["Normal"]["T1"]))
-    print("T3 / T2 = {:10.2f}".format(cost_of_production["Normal"]["T3"]/cost_of_production["Normal"]["T2"]))
-    print("T2 / T1 = {:10.2f}".format(cost_of_production["Normal"]["T2"]/cost_of_production["Normal"]["T1"]))
+    print(
+        "T3 / T1 = {:10.2f}".format(
+            cost_of_production["Normal"]["T3"] / cost_of_production["Normal"]["T1"]
+        )
+    )
+    print(
+        "T3 / T2 = {:10.2f}".format(
+            cost_of_production["Normal"]["T3"] / cost_of_production["Normal"]["T2"]
+        )
+    )
+    print(
+        "T2 / T1 = {:10.2f}".format(
+            cost_of_production["Normal"]["T2"] / cost_of_production["Normal"]["T1"]
+        )
+    )
+
+    # unverified information
+    # a = [
+    # 1 - 0.25,
+    # 1 * 0.9,
+    # 1 * 0.1 * 0.9,
+    # 1 * 0.1 * 0.1 * 0.9,
+    # 1 * 0.1 * 0.1 * 0.1,
+    # ]
+    # print(a)
+    # print(a[1:])
+    # print(sum(a[1:]))
