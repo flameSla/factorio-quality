@@ -45,8 +45,14 @@ def new_q(
     productivity_amount,
     productivity_tier,
     productivity_quality,
-    additional50percent=False,
+    additional50percent,
+    full_name,
 ):
+    Qinp = 0
+    text_Q = ""
+    Pinp = 1.0
+    text_P = ""
+
     if quality_amount > 0:
         Qinp = (
             quality_amount
@@ -54,14 +60,12 @@ def new_q(
             / 100.0
             * quality[quality_quality]
         )
-        text_Q = "{}xQ-{}'{}' ".format(
+        text_Q = "{}xQ{}'{}' ".format(
             quality_amount,
-            quality_tier,
+            quality_tier[-1:],
             quality_quality[:3],
         )
-    else:
-        Qinp = 0
-        text_Q = ""
+
     if productivity_amount > 0:
         Pinp = (
             1.0
@@ -70,38 +74,52 @@ def new_q(
             / 100.0
             * quality[productivity_quality]
         )
-        text_P = "{}xP-{}'{}' ".format(
+        text_P = "{}xP{}'{}' ".format(
             productivity_amount,
-            productivity_tier,
+            productivity_tier[-1:],
             productivity_quality[:3],
         )
-    else:
-        Pinp = 1.0
-        text_P = ""
 
     if additional50percent:
         Pinp += 0.5
 
-    text = "{}: {}{}".format(quality_amount + productivity_amount, text_Q, text_P)
+    if full_name:
+        text = "{}: {:<23s}".format(
+            quality_amount + productivity_amount, text_Q + text_P
+        )
+    else:
+        text = "{}: {}".format(quality_amount + productivity_amount, text_Q + text_P)
+
+    if quality_amount + productivity_amount == 0:
+        text = "0:           "
+
     res = np.zeros((5, 5), dtype="float64")
 
-    res[0][1] = Qinp
-    res[0][2] = Qinp * 0.1
-    res[0][3] = Qinp * 0.01
-    res[0][4] = Qinp * 0.001
-    res[0][0] = 1 - sum(res[0])
+    res[0][1] = Qinp * 0.9
+    res[0][2] = Qinp * 0.1 * 0.9
+    res[0][3] = Qinp * 0.1 * 0.1 * 0.9
+    res[0][4] = Qinp * 0.1 * 0.1 * 0.1
+    res[0][0] = 1 - Qinp
+    if abs(sum(res[0][1:]) - Qinp) > 0.00001:
+        raise Exception(sum(res[0][1:]))
 
-    res[1][2] = Qinp
-    res[1][3] = Qinp * 0.1
-    res[1][4] = Qinp * 0.01
-    res[1][1] = 1 - sum(res[1])
+    res[1][2] = Qinp * 0.9
+    res[1][3] = Qinp * 0.1 * 0.9
+    res[1][4] = Qinp * 0.1 * 0.1
+    res[1][1] = 1 - Qinp
+    if abs(sum(res[1][2:]) - Qinp) > 0.00001:
+        raise Exception(sum(res[1][2:]))
 
-    res[2][3] = Qinp
+    res[2][3] = Qinp * 0.9
     res[2][4] = Qinp * 0.1
-    res[2][2] = 1 - sum(res[2])
+    res[2][2] = 1 - Qinp
+    if abs(sum(res[2][3:]) - Qinp) > 0.00001:
+        raise Exception(sum(res[2][3:]))
 
     res[3][4] = Qinp
-    res[3][3] = 1 - sum(res[3])
+    res[3][3] = 1 - Qinp
+    if abs(sum(res[3][4:]) - Qinp) > 0.00001:
+        raise Exception(sum(res[3][4:]))
 
     res[4][4] = 1
 
@@ -116,7 +134,16 @@ def get_q_list(number_of_modules, tier, q_quality, additional50percent):
         for p in range(0, number_of_modules + 1):
             if q + p <= number_of_modules and q + p > 0:
                 q_list.append(
-                    new_q(q, tier, q_quality, p, tier, q_quality, additional50percent)
+                    new_q(
+                        q,
+                        tier,
+                        q_quality,
+                        p,
+                        tier,
+                        q_quality,
+                        additional50percent,
+                        True,
+                    )
                 )
     return q_list
 
@@ -125,7 +152,7 @@ def get_q_list(number_of_modules, tier, q_quality, additional50percent):
 def get_q_list_Qonly(number_of_modules, tier, q_quality, additional50percent):
     q_list = []
     for q in range(0, number_of_modules + 1):
-        q_list.append(new_q(q, tier, q_quality, 0, "", "", additional50percent))
+        q_list.append(new_q(q, tier, q_quality, 0, "", "", additional50percent, False))
     return q_list
 
 
@@ -133,7 +160,7 @@ def get_q_list_Qonly(number_of_modules, tier, q_quality, additional50percent):
 def get_q_list_Ponly(number_of_modules, tier, q_quality, additional50percent):
     q_list = []
     for p in range(0, number_of_modules + 1):
-        q_list.append(new_q(0, "", "", p, tier, q_quality, additional50percent))
+        q_list.append(new_q(0, "", "", p, tier, q_quality, additional50percent, False))
     return q_list
 
 
