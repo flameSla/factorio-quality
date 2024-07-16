@@ -82,7 +82,7 @@ def make_a_complete_search(x0, scheme, name_of_the_machines, q_list, q_level_lis
                         out["x0"],
                         out["out"],
                         "".join(
-                            " {} = {:<27s}".format(a, b["text"])
+                            " {} = {}".format(a, b["text"])
                             for a, b in zip(name_of_the_machines, q)
                         ),
                     ]
@@ -90,7 +90,7 @@ def make_a_complete_search(x0, scheme, name_of_the_machines, q_list, q_level_lis
             else:
                 print(
                     "\t{} -> out = {}".format(
-                        "".join("{:<27s}".format(t["text"]) for t in q),
+                        "".join("{:23s}".format(t["text"]) for t in q),
                         out["out"][q_level],
                     )
                 )
@@ -105,7 +105,7 @@ def make_a_complete_search(x0, scheme, name_of_the_machines, q_list, q_level_lis
 
 q = "Normal"
 # q = "Uncommon"
-# q = "Rare"
+q = "Rare"
 # q = "Epic"
 # q = "Legendary"
 
@@ -116,14 +116,15 @@ print()
 make_a_complete_search(
     [1.0, 0, 0, 0, 0],
     scheme_2(),
-    ("drill", "furn", "rec", "machine"),
+    ("drill", "furn", "rec", "furn", "machine"),
     [
         get_q_list_Qonly(3, "T3", q, False),
         get_q_list(2, "T3", q, False),
         get_q_list_Qonly(4, "T3", q, False),
+        get_q_list_Ponly(2, "T3", q, False),
         get_q_list_Ponly(4, "T3", q, False),
     ],
-    q_level_list=[1, 2],
+    q_level_list=[1, 4],
 )
 
 print()
@@ -133,9 +134,13 @@ print()
 make_a_complete_search(
     [1.0, 0, 0, 0, 0],
     scheme_1(),
-    ("assembly machine", "recycler"),
-    [get_q_list(4, "T3", q, False), get_q_list_Qonly(4, "T3", q, False)],
-    q_level_list=[1, 2],
+    ("machine", "recycler", "machine"),
+    [
+        get_q_list(4, "T3", q, False),
+        get_q_list_Qonly(4, "T3", q, False),
+        get_q_list_Ponly(4, "T3", q, False),
+    ],
+    q_level_list=[1, 4],
 )
 
 # make_a_complete_search(
@@ -148,49 +153,19 @@ make_a_complete_search(
 # print("==================")
 # print(new_q(3, "T3", "Normal", 0, "", "", False))
 
-q = "Normal"
-q = "Rare"
-m = new_q(4, "T3", "Normal", 0, "", "", False)
-get_the_ratio_v2(
-    [1, 0, 0, 0, 0],
-    scheme_2(),
-    4,
-    (
-        new_q(3, "T3", q, 0, "", "", False),
-        new_q(2, "T3", q, 0, "", "", False),
-        new_q(4, "T3", q, 0, "", "", False),
-        new_q(0, "", "", 4, "T3", q, False),
-    ),
-    True,
-    log=False,
-)
-
-m = new_q(4, "T3", q, 0, "", "", False)
-get_the_ratio_v2(
-    [1, 0, 0, 0, 0],
-    scheme_2(),
-    1,
-    (
-        new_q(3, "T3", q, 0, "", "", False),
-        new_q(0, "", "", 2, "T3", q, False),
-        new_q(0, "", "", 0, "", "", False),
-        new_q(0, "", "", 4, "T3", q, False),
-    ),
-    True,
-    log=False,
-)
-
-m = new_q(4, "T3", q, 0, "", "", False)
-get_the_ratio_v2(
-    [1, 0, 0, 0, 0],
-    scheme_2(),
-    1,
-    (
-        new_q(3, "T3", q, 0, "", "", False),
-        new_q(0, "", "", 2, "T3", q, False),
-        new_q(4, "T3", q, 0, "", "", False),
-        new_q(0, "", "", 4, "T3", q, False),
-    ),
-    True,
-    log=False,
-)
+# q = "Normal"
+# q = "Rare"
+# get_the_ratio_v2(
+#     [1, 0, 0, 0, 0],
+#     scheme_2(),
+#     4,
+#     (
+#         new_q(3, "T3", q, 0, "", "", False, False),
+#         new_q(2, "T3", q, 0, "", "", False, False),
+#         new_q(4, "T3", q, 0, "", "", False, False),
+#         new_q(0, "", "", 2, "T3", q, False, False),
+#         new_q(0, "", "", 4, "T3", q, False, False),
+#     ),
+#     True,
+#     log=False,
+# )
