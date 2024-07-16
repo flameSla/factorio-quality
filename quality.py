@@ -12,6 +12,7 @@ from utilities import print_q
 
 from schemes import scheme_1
 from schemes import scheme_2
+from schemes import scheme_3
 
 
 np.seterr(all="raise")
@@ -72,9 +73,12 @@ def make_a_complete_search(x0, scheme, name_of_the_machines, q_list, q_level_lis
                 print("  ...")
                 break
 
+    i = 0
     res = [[], [], [], [], []]
     for q_level in q_level_list:
         for q in product(*q_list):
+            print(i)
+            i += 1
             out = get_the_ratio_v2(list(x0), scheme, q_level, q, False)
             if abs(out["out"][q_level] - 1.0) <= 0.1:
                 res[q_level].append(
@@ -109,38 +113,97 @@ q = "Rare"
 # q = "Epic"
 # q = "Legendary"
 
-print()
-print("==================")
-print("mining drill + furnace")
-print()
-make_a_complete_search(
-    [1.0, 0, 0, 0, 0],
-    scheme_2(),
-    ("drill", "furn", "rec", "furn", "machine"),
-    [
-        get_q_list_Qonly(3, "T3", q, False),
-        get_q_list(2, "T3", q, False),
-        get_q_list_Qonly(4, "T3", q, False),
-        get_q_list_Ponly(2, "T3", q, False),
-        get_q_list_Ponly(4, "T3", q, False),
-    ],
-    q_level_list=[1, 4],
-)
+# print()
+# print("==================")
+# print("mining drill + furnace")
+# print()
+# make_a_complete_search(
+#     [1.0, 0, 0, 0, 0],
+#     scheme_2(),
+#     ("drill", "furn", "rec", "furn", "machine"),
+#     [
+#         get_q_list_Qonly(3, "T3", q, False),
+#         get_q_list(2, "T3", q, False),
+#         get_q_list_Qonly(4, "T3", q, False),
+#         get_q_list_Ponly(2, "T3", q, False),
+#         get_q_list_Ponly(4, "T3", q, False),
+#     ],
+#     q_level_list=[1, 2],
+# )
 
+# print()
+# print("==================")
+# print("assembly machine")
+# print()
+# make_a_complete_search(
+#     [1.0, 0, 0, 0, 0],
+#     scheme_1(),
+#     ("machine", "recycler", "machine"),
+#     [
+#         get_q_list(4, "T3", q, False),
+#         get_q_list_Qonly(4, "T3", q, False),
+#         get_q_list_Ponly(4, "T3", q, False),
+#     ],
+#     q_level_list=[1, 2],
+# )
+
+# print()
+# print("==================")
+# print("EMP")
+# print()
+# make_a_complete_search(
+#     [1.0, 0, 0, 0, 0],
+#     scheme_1(),
+#     ("EMP", "recycler", "EMP"),
+#     [
+#         get_q_list(5, "T3", q, True),
+#         get_q_list_Qonly(4, "T3", q, False),
+#         get_q_list_Ponly(5, "T3", q, True),
+#     ],
+#     q_level_list=[1, 4],
+# )
+
+
+# q = "Rare"
+# q = "Legendary"
+# print()
+# print("==================")
+# print("drill -> furn -> GC (iron only)")
+# print()
+# make_a_complete_search(
+#     [1.0, 0, 0, 0, 0],
+#     scheme_3(),
+#     ("drill", "furn1", "furn2", "machine", "rec", "machine"),
+#     [
+#         get_q_list_Qonly(3, "T3", q, False),  # drill
+#         get_q_list(2, "T3", q, False),  # furn1
+#         get_q_list_Ponly(2, "T3", q, False),  # furn2
+#         get_q_list(4, "T3", q, False),  # ass GC
+#         get_q_list_Qonly(4, "T3", q, False),  # recycler
+#         get_q_list_Ponly(4, "T3", q, False),  # ass GC
+#     ],
+#     q_level_list=[4],
+# )
+
+
+q = "Legendary"
 print()
 print("==================")
-print("assembly machine")
+print("drill -> furn -> GC (iron only)")
 print()
 make_a_complete_search(
     [1.0, 0, 0, 0, 0],
-    scheme_1(),
-    ("machine", "recycler", "machine"),
+    scheme_3(),
+    ("drill", "furn1", "furn2", "EMP", "rec", "EMP"),
     [
-        get_q_list(4, "T3", q, False),
-        get_q_list_Qonly(4, "T3", q, False),
-        get_q_list_Ponly(4, "T3", q, False),
+        get_q_list_Qonly(3, "T3", q, False),  # drill
+        get_q_list(2, "T3", q, False),  # furn1
+        get_q_list_Ponly(2, "T3", q, False),  # furn2
+        get_q_list(5, "T3", q, True),  # ass GC
+        get_q_list_Qonly(4, "T3", q, False),  # recycler
+        get_q_list_Ponly(5, "T3", q, True),  # ass GC
     ],
-    q_level_list=[1, 4],
+    q_level_list=[4],
 )
 
 # make_a_complete_search(
@@ -169,3 +232,8 @@ make_a_complete_search(
 #     True,
 #     log=False,
 # )
+
+print()
+print("==================")
+print("The calculation is finished")
+print()
