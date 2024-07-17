@@ -12,6 +12,7 @@ Q1, Q2 - blocks for calculating modules. Multiplies the quality/productivity mat
 The calculation of x0,x1...south is in the **scheme_1** class
 
 
+```
 ***********************************
 Normal
 q=1 in:      6.7385 out: 1.00 machine=4: 4xQ3'Nor'               recycler=4: 4xQ3'Nor'
@@ -62,3 +63,4 @@ q=1 in:      1.1140 out: 1.00 machine=5: 1xQ3'Leg' 4xP3'Leg'     recycler=4: 4xQ
 q=2 in:      2.6184 out: 1.00 machine=5: 1xQ3'Leg' 4xP3'Leg'     recycler=4: 4xQ3'Leg'
 q=3 in:      6.1529 out: 1.00 machine=5: 1xQ3'Leg' 4xP3'Leg'     recycler=4: 4xQ3'Leg'
 q=4 in:     13.0121 out: 1.00 machine=5: 1xQ3'Leg' 4xP3'Leg'     recycler=4: 4xQ3'Leg'
+```
