@@ -62,7 +62,13 @@ def get_the_ratio_v2(x0, scheme, q_level, q_list, debug, log=False):
 
 # ====================================
 def make_a_complete_search(
-    x0, scheme, name_of_the_machines, q_list, q_level_list, filename
+    x0,
+    scheme,
+    name_of_the_machines,
+    q_list,
+    q_level_list,
+    filename,
+    show_the_counter=False,
 ):
     s_level = [x > 0 for x in x0].index(True)
 
@@ -107,7 +113,7 @@ def make_a_complete_search(
                 "text_csv": "",
             }
             for q in product(*q_list):
-                if i % 1000 == 0:
+                if show_the_counter and i % 1000 == 0:
                     print(i)
                 i += 1
                 out = get_the_ratio_v2(list(x0), scheme, q_level, q, False)
@@ -167,62 +173,59 @@ def make_a_complete_search(
 #     q_level_list=[1, 2],
 # )
 
-# print()
-# print("==================")
-# print("assembly machine")
-# print()
-# for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
-#     make_a_complete_search(
-#         [1.0, 0, 0, 0, 0],
-#         scheme_1(),
-#         ("machine", "recycler", "machine"),
-#         [
-#             get_q_list(4, "T3", q, False),
-#             get_q_list_Qonly(4, "T3", q, False),
-#             get_q_list_Ponly(4, "T3", q, False),
-#         ],
-#         q_level_list=[0, 1, 2, 3, 4],
-#         filename="out_{}.csv".format(q)
-#     )
-
-# print()
-# print("==================")
-# print("EMP")
-# print()
-# make_a_complete_search(
-#     [1.0, 0, 0, 0, 0],
-#     scheme_1(),
-#     ("EMP", "recycler", "EMP"),
-#     [
-#         get_q_list(5, "T3", q, True),
-#         get_q_list_Qonly(4, "T3", q, False),
-#         get_q_list_Ponly(5, "T3", q, True),
-#     ],
-#     q_level_list=[1, 4],
-# )
-
 print()
 print("==================")
-print("drill -> furn -> GC (iron only)")
+print("assembly machine")
 print()
 for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
     make_a_complete_search(
         [1.0, 0, 0, 0, 0],
-        scheme_4(),
-        ("drill", "furn1", "furn2", "machGC1", "machGC2", "machT11", "rec", "machT12"),
+        scheme_1(),
+        ("machine", "recycler", "machine"),
         [
-            get_q_list_Qonly(3, "T3", q, False),  # drill
-            get_q_list(2, "T3", q, False),  # furn1
-            get_q_list_Ponly(2, "T3", q, False),  # furn2
-            get_q_list(4, "T3", q, False),  # ass GC1
-            get_q_list_Ponly(4, "T3", q, False),  # ass GC2
-            get_q_list_Qonly(4, "T3", q, False),  # T1
-            get_q_list_Qonly(4, "T3", q, False),  # recycler
-            get_q_list_Qonly(4, "T3", q, False),  # T1
+            get_q_list(4, "T3", q, False),
+            get_q_list_Qonly(4, "T3", q, False),
+            get_q_list_Ponly(4, "T3", q, False),
         ],
-        q_level_list=[0, 2],
-        filename="out_{}.csv".format(q),
+        q_level_list=[0, 1, 2, 3, 4],
+        filename="out_machine_{}.csv".format(q),
     )
+    make_a_complete_search(
+        [1.0, 0, 0, 0, 0],
+        scheme_1(),
+        ("    EMP", "recycler", "EMP"),
+        [
+            get_q_list(5, "T3", q, True),
+            get_q_list_Qonly(4, "T3", q, False),
+            get_q_list_Ponly(5, "T3", q, True),
+        ],
+        q_level_list=[0, 1, 2, 3, 4],
+        filename="out_EMP_{}.csv".format(q),
+    )
+
+
+# print()
+# print("==================")
+# print("drill -> furn -> GC (iron only)")
+# print()
+# for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
+#     make_a_complete_search(
+#         [1.0, 0, 0, 0, 0],
+#         scheme_4(),
+#         ("drill", "furn1", "furn2", "machGC1", "machGC2", "machT11", "rec", "machT12"),
+#         [
+#             get_q_list_Qonly(3, "T3", q, False),  # drill
+#             get_q_list(2, "T3", q, False),  # furn1
+#             get_q_list_Ponly(2, "T3", q, False),  # furn2
+#             get_q_list(4, "T3", q, False),  # ass GC1
+#             get_q_list_Ponly(4, "T3", q, False),  # ass GC2
+#             get_q_list_Qonly(4, "T3", q, False),  # T1
+#             get_q_list_Qonly(4, "T3", q, False),  # recycler
+#             get_q_list_Qonly(4, "T3", q, False),  # T1
+#         ],
+#         q_level_list=[0, 2],
+#         filename="out_{}.csv".format(q),
+#     )
 
 
 # q = "Legendary"
