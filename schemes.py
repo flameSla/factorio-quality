@@ -174,13 +174,13 @@ class scheme_4:
         self.x42 = mul_q(self.x41 * self.mask_recycler, q_list[3]["matrix"])  # Q1 GC
         self.x43 = mul_q(self.x41 * self.mask_out, q_list[4]["matrix"])  # Q2 GC
         self.x5 = self.x42 + self.x43
-        self.x7 = self.x5 + self.x6  # assembly machine GC
+        self.x7 = (self.x5 + self.x6) / 5.0  # assembly machine GC
         self.x8 = mul_q(self.x7, q_list[5]["matrix"])  # Q3
         self.x9 = self.x8 * 0.25 * self.mask_recycler  # recycler + sorting
         self.x10 = mul_q(self.x9, q_list[6]["matrix"])  # Q4
         self.x6 = self.x10 * self.mask_recycler
         self.x11 = mul_q(
-            self.x10 * self.mask_out, q_list[7]["matrix"]
+            self.x10 * self.mask_out / 5.0, q_list[7]["matrix"]
         )  # assembly machine GC2
         self.xout = self.x8 * self.mask_out + self.x11
         return self.xout
