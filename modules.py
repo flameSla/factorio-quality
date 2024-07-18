@@ -54,12 +54,8 @@ def new_q(
     text_P = ""
 
     if quality_amount > 0:
-        Qinp = (
-            quality_amount
-            * quality_tiers[quality_tier]
-            / 100.0
-            * quality[quality_quality]
-        )
+        percentage = int(quality_tiers[quality_tier] * quality[quality_quality] * 10.0)
+        Qinp = quality_amount * percentage / 1000.0
         text_Q = "{}xQ{}'{}' ".format(
             quality_amount,
             quality_tier[-1:],
@@ -67,13 +63,10 @@ def new_q(
         )
 
     if productivity_amount > 0:
-        Pinp = (
-            1.0
-            + productivity_amount
-            * productivity_tiers[productivity_tier]
-            / 100.0
-            * quality[productivity_quality]
+        percentage = int(
+            productivity_tiers[productivity_tier] * quality[productivity_quality] * 10.0
         )
+        Pinp = 1.0 + productivity_amount * percentage / 1000.0
         text_P = "{}xP{}'{}' ".format(
             productivity_amount,
             productivity_tier[-1:],
@@ -131,7 +124,7 @@ def get_q_list(number_of_modules, tier, q_quality, additional50percent):
     q_list = []
     for q in range(0, number_of_modules + 1):
         for p in range(0, number_of_modules + 1):
-            if q + p <= number_of_modules and q + p > 0:
+            if q + p <= number_of_modules:
                 q_list.append(
                     new_q(
                         q,
