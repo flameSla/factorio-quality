@@ -178,6 +178,8 @@ print("==================")
 print("assembly machine")
 print()
 for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
+    print("==================")
+    print(q)
     make_a_complete_search(
         [1.0, 0, 0, 0, 0],
         scheme_1(),
