@@ -8,8 +8,6 @@ def get_masks(q_level):
     mask_out = np.ones(5, dtype="float64")
     mask_recycler[:q_level] = 1.0
     mask_out[:q_level] = 0.0
-    # if q_level == 0:
-    #     mask_out[0] = 1.0
 
     return mask_recycler, mask_out
 
@@ -168,19 +166,19 @@ class scheme_4:
     def calc(self, x0, q_list):
         self.x1 = mul_q(x0, q_list[0]["matrix"])  # Q0 - mining drill
         # sorting ore
-        self.x3 = mul_q(self.x1 * self.mask_recycler, q_list[1]["matrix"])  # Q1
-        self.x4 = mul_q(self.x1 * self.mask_out, q_list[2]["matrix"])  # Q2
+        self.x3 = mul_q(self.x1 * self.mask_recycler, q_list[1]["matrix"])  # Q1 furn
+        self.x4 = mul_q(self.x1 * self.mask_out, q_list[2]["matrix"])  # Q2 furn
         self.x41 = self.x3 + self.x4
-        self.x42 = mul_q(self.x41 * self.mask_recycler, q_list[3]["matrix"])  # Q1 GC
-        self.x43 = mul_q(self.x41 * self.mask_out, q_list[4]["matrix"])  # Q2 GC
+        self.x42 = mul_q(self.x41 * self.mask_recycler, q_list[3]["matrix"])  # Q3 GC
+        self.x43 = mul_q(self.x41 * self.mask_out, q_list[4]["matrix"])  # Q4 GC
         self.x5 = self.x42 + self.x43
-        self.x7 = (self.x5 + self.x6) / 5.0  # assembly machine GC
-        self.x8 = mul_q(self.x7, q_list[5]["matrix"])  # Q3
+        self.x7 = (self.x5 + self.x6) / 5.0  # assembly machine T1
+        self.x8 = mul_q(self.x7, q_list[5]["matrix"])  # Q5 T1
         self.x9 = self.x8 * 0.25 * self.mask_recycler  # recycler + sorting
-        self.x10 = mul_q(self.x9, q_list[6]["matrix"])  # Q4
+        self.x10 = mul_q(self.x9, q_list[6]["matrix"])  # Q6 rec
         self.x6 = self.x10 * self.mask_recycler
         self.x11 = mul_q(
-            self.x10 * self.mask_out / 5.0, q_list[7]["matrix"]
+            self.x10 * self.mask_out / 5.0, q_list[7]["matrix"] # Q7 T1
         )  # assembly machine GC2
         self.xout = self.x8 * self.mask_out + self.x11
         return self.xout
