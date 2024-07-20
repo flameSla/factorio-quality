@@ -12,10 +12,6 @@ from utilities import print_line
 from utilities import print_q
 
 from schemes import scheme_1
-from schemes import scheme_2
-from schemes import scheme_3
-from schemes import scheme_4
-
 
 np.seterr(all="raise")
 
@@ -149,30 +145,6 @@ def make_a_complete_search(
     return min_res
 
 
-# q = "Normal"
-# q = "Uncommon"
-# q = "Rare"
-# q = "Epic"
-# q = "Legendary"
-
-# print()
-# print("==================")
-# print("mining drill + furnace")
-# print()
-# make_a_complete_search(
-#     [1.0, 0, 0, 0, 0],
-#     scheme_2(),
-#     ("drill", "furn", "rec", "furn", "machine"),
-#     [
-#         get_q_list_Qonly(3, "T3", q, False),
-#         get_q_list(2, "T3", q, False),
-#         get_q_list_Qonly(4, "T3", q, False),
-#         get_q_list_Ponly(2, "T3", q, False),
-#         get_q_list_Ponly(4, "T3", q, False),
-#     ],
-#     q_level_list=[1, 2],
-# )
-
 print()
 print("==================")
 print("assembly machine")
@@ -204,57 +176,6 @@ for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
         q_level_list=[0, 1, 2, 3, 4],
         filename="out_EMP_{}.csv".format(q),
     )
-
-
-# print()
-# print("==================")
-# print("drill -> furn -> GC (iron only)")
-# print()
-# for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
-#     make_a_complete_search(
-#         [1.0, 0, 0, 0, 0],
-#         scheme_4(),
-#         ("drill", "furn1", "furn2", "machGC1", "machGC2", "machT11", "rec", "machT12"),
-#         [
-#             get_q_list_Qonly(3, "T3", q, False),  # drill
-#             get_q_list(2, "T3", q, False),  # furn1
-#             get_q_list_Ponly(2, "T3", q, False),  # furn2
-#             get_q_list(4, "T3", q, False),  # ass GC1
-#             get_q_list_Ponly(4, "T3", q, False),  # ass GC2
-#             get_q_list_Qonly(4, "T3", q, False),  # T1
-#             get_q_list_Qonly(4, "T3", q, False),  # recycler
-#             get_q_list_Qonly(4, "T3", q, False),  # T1
-#         ],
-#         q_level_list=[0, 2],
-#         filename="out_{}.csv".format(q),
-#     )
-
-
-# q = "Legendary"
-# print()
-# print("==================")
-# print("drill -> furn -> GC (iron only)")
-# print()
-# make_a_complete_search(
-#     [1.0, 0, 0, 0, 0],
-#     scheme_3(),
-#     ("drill", "furn1", "furn2", "EMP", "rec", "EMP"),
-#     [
-#         get_q_list_Qonly(3, "T3", q, False),  # drill
-#         get_q_list(2, "T3", q, False),  # furn1
-#         get_q_list_Ponly(2, "T3", q, False),  # furn2
-#         get_q_list(5, "T3", q, True),  # ass GC
-#         get_q_list_Qonly(4, "T3", q, False),  # recycler
-#         get_q_list_Ponly(5, "T3", q, True),  # ass GC
-#     ],
-#     q_level_list=[4],
-# )
-
-# make_a_complete_search(
-#     get_q_list(5, "T3", "Legendary", True),
-#     get_q_list_Qonly(4, "T3", "Legendary", False),
-# )
-
 
 # print()
 # print("==================")

@@ -143,9 +143,6 @@ def get_q_list(number_of_modules, tier, q_quality, additional50percent):
 # ====================================
 def get_q_list_Qonly(number_of_modules, tier, q_quality, additional50percent):
     q_list = []
-    # for q in range(0, number_of_modules + 1):
-    #     q_list.append(new_q(q, tier, q_quality, 0, "", "", additional50percent, False))
-
     q_list.append(new_q(0, "", "", 0, "", "", additional50percent, False))
     q_list.append(
         new_q(number_of_modules, tier, q_quality, 0, "", "", additional50percent, False)
@@ -156,8 +153,6 @@ def get_q_list_Qonly(number_of_modules, tier, q_quality, additional50percent):
 # ====================================
 def get_q_list_Ponly(number_of_modules, tier, q_quality, additional50percent):
     q_list = []
-    # for p in range(0, number_of_modules + 1):
-    #     q_list.append(new_q(0, "", "", p, tier, q_quality, additional50percent, False))
     q_list.append(
         new_q(0, "", "", number_of_modules, tier, q_quality, additional50percent, False)
     )
