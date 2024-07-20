@@ -173,6 +173,7 @@ def make_a_complete_search(
 #     q_level_list=[1, 2],
 # )
 
+tier = "T3"
 print()
 print("==================")
 print("assembly machine")
@@ -185,9 +186,9 @@ for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
         scheme_1(),
         ("machine", "recycler", "machine"),
         [
-            get_q_list(4, "T3", q, False),
-            get_q_list_Qonly(4, "T3", q, False),
-            get_q_list_Ponly(4, "T3", q, False),
+            get_q_list(4, tier, q, False),
+            get_q_list_Ponly(4, tier, q, False),
+            get_q_list_Qonly(4, tier, q, False),
         ],
         q_level_list=[0, 1, 2, 3, 4],
         filename="out_machine_{}.csv".format(q),
@@ -197,9 +198,9 @@ for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
         scheme_1(),
         ("    EMP", "recycler", "EMP"),
         [
-            get_q_list(5, "T3", q, True),
-            get_q_list_Qonly(4, "T3", q, False),
-            get_q_list_Ponly(5, "T3", q, True),
+            get_q_list(5, tier, q, True),
+            get_q_list_Ponly(5, tier, q, True),
+            get_q_list_Qonly(4, tier, q, False),
         ],
         q_level_list=[0, 1, 2, 3, 4],
         filename="out_EMP_{}.csv".format(q),

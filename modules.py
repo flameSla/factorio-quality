@@ -1,4 +1,5 @@
 import numpy as np
+from utilities import print_q
 
 quality = {
     "Normal": 1.0,
@@ -25,6 +26,9 @@ def mul_q(inp, q):
         raise Exception("len(inp) != 5")
 
     if len(q) != 5 or len(q[0]) != 5:
+        print_q(q)
+        print(len(q))
+        print(len(q[0]))
         raise Exception("len(q) != 5")
 
     res = [0, 0, 0, 0, 0]
