@@ -64,6 +64,49 @@ class scheme_1(scheme):
 
 
 # ====================================
+class scheme_11(scheme):
+    """assembly machine + recycler"""
+
+    """ a separate set of modules for machines """
+
+    def __init__(self):
+        pass
+
+    def clear(self, q_level):
+        self.feedback = np.zeros(5, dtype="float64")
+        self.get_masks(q_level)
+
+    def calc(self, x0, q_list):
+        self.x1 = x0 + self.feedback  # feedback
+        self.x20 = mul_q(self.x1 * [1.0, 0.0, 0.0, 0.0, 0.0], q_list[0]["matrix"])
+        self.x21 = mul_q(self.x1 * [0.0, 1.0, 0.0, 0.0, 0.0], q_list[1]["matrix"])
+        self.x22 = mul_q(self.x1 * [0.0, 0.0, 1.0, 0.0, 0.0], q_list[2]["matrix"])
+        self.x23 = mul_q(self.x1 * [0.0, 0.0, 0.0, 1.0, 0.0], q_list[3]["matrix"])
+        self.x24 = mul_q(self.x1 * [0.0, 0.0, 0.0, 0.0, 1.0], q_list[4]["matrix"])
+        self.x2 = self.x20 + self.x21 + self.x22 + self.x23 + self.x24
+        self.x3, self.xout = self.sorting(self.x2)
+        self.feedback = mul_q(self.x3 * 0.25, q_list[5]["matrix"])  # Q3 recycler
+
+        return self.xout
+
+    def print0(self, x0, q_list, tic):
+        print()
+        print("==================")
+        print("q1 (assembly machine) = {}".format(q_list[0]["text"]))
+        print("q1 (assembly machine) = {}".format(q_list[1]["text"]))
+        print("q2 (recycler) = {}".format(q_list[2]["text"]))
+        print("tic = {}".format(tic))
+        print_line("x0 = ", x0, "{:12.4f}".format(sum(x0)))
+
+    def print1(self, x0, q_list, tic):
+        print_line("x1 = ", self.x1)
+        print_line("x2 = ", self.x2)
+        print_line("x3 = ", self.x3)
+        print_line("feedback = ", self.x1)
+        print_line("xout ", self.xout)
+
+
+# ====================================
 class scheme_2:
     """mining drill + furnace + recycler + assembly machine"""
 
