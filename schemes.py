@@ -1,6 +1,12 @@
 import numpy as np
 from modules import mul_q
+from modules import new_q
 from utilities import print_line
+from utilities import print_mat5x5
+from utilities import print_q
+
+
+identity_matrix = np.eye(5, dtype="float64")
 
 
 # ====================================
@@ -15,6 +21,16 @@ class scheme:
         self.mask_out = np.ones(5, dtype="float64")
         self.mask_recycler[:q_level] = 1.0
         self.mask_out[:q_level] = 0.0
+        self.q_mask_recycler = np.array(
+            [
+                self.mask_recycler,
+                self.mask_recycler,
+                self.mask_recycler,
+                self.mask_recycler,
+                self.mask_recycler,
+            ],
+            dtype="float64",
+        )
 
     def sorting(self, inp):
         return inp * self.mask_recycler, inp * self.mask_out
@@ -32,35 +48,43 @@ class scheme_1(scheme):
     def __init__(self):
         pass
 
-    def clear(self, q_level):
-        self.feedback = np.zeros(5, dtype="float64")
+    def calc(self, x0, q_level, q_list):
         self.get_masks(q_level)
 
-    def calc(self, x0, q_list):
+        # k = Q0 * q_mask_recycler * Q2
+        # feedback = x2 * q_mask_recycler * Q2
+        # x2 = (x0 + feedback) * Q0
+        # feedback = (x0 + feedback) * Q0 * q_mask_recycler * Q2
+        # feedback = (x0 + feedback) * k
+        # feedback = x0 * k + feedback * k
+        # feedback * (1 - k)= x0 * k
+        q = np.concatenate(
+            (q_list[0]["matrix"][:][:q_level], q_list[1]["matrix"][:][q_level:])
+        )
+
+        k = (q * self.q_mask_recycler * 0.25).dot(q_list[2]["matrix"])
+        obr = np.linalg.inv(identity_matrix - k)
+        self.feedback = mul_q(mul_q(x0, k), obr)
         self.x1 = x0 + self.feedback  # feedback
         self.x2 = self.machine(
             self.x1, q_list[0]["matrix"], q_list[1]["matrix"]
         )  # Q1, Q2, assembly machine
-        self.x3, self.xout = self.sorting(self.x2)
-        self.feedback = mul_q(self.x3 * 0.25, q_list[2]["matrix"])  # Q3 recycler
+        self.xout = self.x2 * self.mask_out
 
         return self.xout
 
-    def print0(self, x0, q_list, tic):
+    def print(self, x0, q_list):
         print()
         print("==================")
         print("q1 (assembly machine) = {}".format(q_list[0]["text"]))
         print("q1 (assembly machine) = {}".format(q_list[1]["text"]))
         print("q2 (recycler) = {}".format(q_list[2]["text"]))
-        print("tic = {}".format(tic))
-        print_line("x0 = ", x0, "{:12.4f}".format(sum(x0)))
-
-    def print1(self, x0, q_list, tic):
-        print_line("x1 = ", self.x1)
-        print_line("x2 = ", self.x2)
-        print_line("x3 = ", self.x3)
-        print_line("feedback = ", self.x1)
-        print_line("xout ", self.xout)
+        print_line("      x0 = ", x0, "{:12.4f}".format(sum(x0)))
+        print_line("feedback = ", self.feedback)
+        print_line("      x1 = ", self.x1)
+        print_line("      x2 = ", self.x2)
+        print_line("feedback = ", self.feedback)
+        print_line("    xout = ", self.xout)
 
 
 # ====================================
@@ -72,11 +96,32 @@ class scheme_11(scheme):
     def __init__(self):
         pass
 
-    def clear(self, q_level):
-        self.feedback = np.zeros(5, dtype="float64")
+    def calc(self, x0, q_level, q_list):
         self.get_masks(q_level)
 
-    def calc(self, x0, q_list):
+        # k = Q0 * q_mask_recycler * Q2
+        # feedback = x2 * q_mask_recycler * Q2
+        # x2 = (x0 + feedback) * Q0
+        # feedback = (x0 + feedback) * Q0 * q_mask_recycler * Q2
+        # feedback = (x0 + feedback) * k
+        # feedback = x0 * k + feedback * k
+        # feedback * (1 - k)= x0 * k
+
+        q = np.array(
+            [
+                q_list[0]["matrix"][:][0],
+                q_list[1]["matrix"][:][1],
+                q_list[2]["matrix"][:][2],
+                q_list[3]["matrix"][:][3],
+                q_list[4]["matrix"][:][4],
+            ],
+            dtype="float64",
+        )
+
+        k = (q * self.q_mask_recycler * 0.25).dot(q_list[5]["matrix"])
+        obr = np.linalg.inv(identity_matrix - k)
+        self.feedback = mul_q(mul_q(x0, k), obr)
+
         self.x1 = x0 + self.feedback  # feedback
         self.x20 = mul_q(self.x1 * [1.0, 0.0, 0.0, 0.0, 0.0], q_list[0]["matrix"])
         self.x21 = mul_q(self.x1 * [0.0, 1.0, 0.0, 0.0, 0.0], q_list[1]["matrix"])
@@ -84,26 +129,25 @@ class scheme_11(scheme):
         self.x23 = mul_q(self.x1 * [0.0, 0.0, 0.0, 1.0, 0.0], q_list[3]["matrix"])
         self.x24 = mul_q(self.x1 * [0.0, 0.0, 0.0, 0.0, 1.0], q_list[4]["matrix"])
         self.x2 = self.x20 + self.x21 + self.x22 + self.x23 + self.x24
-        self.x3, self.xout = self.sorting(self.x2)
-        self.feedback = mul_q(self.x3 * 0.25, q_list[5]["matrix"])  # Q3 recycler
+        self.xout = self.x2 * self.mask_out
 
         return self.xout
 
-    def print0(self, x0, q_list, tic):
+    def print(self, x0, q_list):
         print()
         print("==================")
-        print("q1 (assembly machine) = {}".format(q_list[0]["text"]))
+        print("q0 (assembly machine) = {}".format(q_list[0]["text"]))
         print("q1 (assembly machine) = {}".format(q_list[1]["text"]))
-        print("q2 (recycler) = {}".format(q_list[2]["text"]))
-        print("tic = {}".format(tic))
-        print_line("x0 = ", x0, "{:12.4f}".format(sum(x0)))
-
-    def print1(self, x0, q_list, tic):
-        print_line("x1 = ", self.x1)
-        print_line("x2 = ", self.x2)
-        print_line("x3 = ", self.x3)
-        print_line("feedback = ", self.x1)
-        print_line("xout ", self.xout)
+        print("q3 (assembly machine) = {}".format(q_list[2]["text"]))
+        print("q4 (assembly machine) = {}".format(q_list[3]["text"]))
+        print("q5 (assembly machine) = {}".format(q_list[4]["text"]))
+        print("q6 (recycler) = {}".format(q_list[5]["text"]))
+        print_line("      x0 = ", x0, "{:12.4f}".format(sum(x0)))
+        print_line("feedback = ", self.feedback)
+        print_line("      x1 = ", self.x1)
+        print_line("      x2 = ", self.x2)
+        print_line("feedback = ", self.feedback)
+        print_line("    xout = ", self.xout)
 
 
 # ====================================
