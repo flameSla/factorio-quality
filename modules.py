@@ -31,14 +31,7 @@ def mul_q(inp, q):
         print(len(q[0]))
         raise Exception("len(q) != 5")
 
-    res = [0, 0, 0, 0, 0]
-    tq = np.transpose(q)
-
-    for i in range(5):
-        res[i] = sum(inp * tq[i])
-
-    # print_line("res = ", res)
-    return np.array(res, dtype="float64")
+    return q.transpose().dot(inp)
 
 
 # constructor for the quality/productivity matrix
