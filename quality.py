@@ -15,6 +15,7 @@ from schemes import scheme_1
 from schemes import scheme_2
 from schemes import scheme_3
 from schemes import scheme_4
+from schemes import scheme_11
 
 
 np.seterr(all="raise")
@@ -22,41 +23,22 @@ np.seterr(all="raise")
 
 # ====================================
 # q_level - required output quality 0...4
-def get_the_ratio_v2(x0, scheme, q_level, q_list, debug, log=False):
-    def get_the_ratio(x0, scheme, q_level, q_list, debug, log):
-        scheme.clear(q_level)
-
-        tic = -1
-        xout_last = np.zeros(5, dtype="float64")
-        while True:
-            tic += 1
-            if log and tic < 30:
-                scheme.print0(x0, q_list, tic)
-            try:
-                xout = scheme.calc(x0, q_list)
-            except FloatingPointError:
-                raise Exception("Positive feedback! The generator!")
-
-            if log and tic < 30:
-                scheme.print1(x0, q_list, tic)
-
-            # has "xout" changed in the last tick?
-            if abs(xout_last[q_level] - xout[q_level]) <= 0.00000000001:
-                if not all([x == 0.0 for x in xout]) or tic > 99:
-                    break
-            else:
-                xout_last = xout
+def get_the_ratio_v2(x0, scheme, q_level, q_list, debug):
+    def get_the_ratio(x0, scheme, q_level, q_list, debug):
+        try:
+            xout = scheme.calc(x0, q_level, q_list)
+        except FloatingPointError:
+            raise Exception("Positive feedback! The generator!")
 
         if debug:
-            scheme.print0(x0, q_list, tic)
-            scheme.print1(x0, q_list, tic)
+            scheme.print(x0, q_list)
 
         return xout
 
-    out = get_the_ratio(x0, scheme, q_level, q_list, False, False)
+    out = get_the_ratio(x0, scheme, q_level, q_list, False)
     if out[q_level] > 0:
         x0 /= out[q_level]
-        out = get_the_ratio(x0, scheme, q_level, q_list, debug, log)
+        out = get_the_ratio(x0, scheme, q_level, q_list, debug)
     return {"x0": x0, "out": out}
 
 
@@ -142,6 +124,13 @@ def make_a_complete_search(
 
                     if temp_res["x0"] < min_res[q_level]["x0"]:
                         min_res[q_level] = dict(temp_res)
+                # else:
+                #     print(
+                #         "".join(
+                #             " {} = {}".format(a, b["text"])
+                #             for a, b in zip(name_of_the_machines, q)
+                #         )
+                #     )
 
     for q in range(5):
         print(min_res[q]["text"])
@@ -149,136 +138,174 @@ def make_a_complete_search(
     return min_res
 
 
-# q = "Normal"
-# q = "Uncommon"
-# q = "Rare"
-# q = "Epic"
-# q = "Legendary"
+######################################
+#
+# main
+if __name__ == "__main__":
 
-# print()
-# print("==================")
-# print("mining drill + furnace")
-# print()
-# make_a_complete_search(
-#     [1.0, 0, 0, 0, 0],
-#     scheme_2(),
-#     ("drill", "furn", "rec", "furn", "machine"),
-#     [
-#         get_q_list_Qonly(3, "T3", q, False),
-#         get_q_list(2, "T3", q, False),
-#         get_q_list_Qonly(4, "T3", q, False),
-#         get_q_list_Ponly(2, "T3", q, False),
-#         get_q_list_Ponly(4, "T3", q, False),
-#     ],
-#     q_level_list=[1, 2],
-# )
+    # q = "Normal"
+    # q = "Uncommon"
+    # q = "Rare"
+    # q = "Epic"
+    # q = "Legendary"
 
-tier = "T3"
-print()
-print("==================")
-print("assembly machine")
-print()
-for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
+    tier = "T3"
+    print()
     print("==================")
-    print(q)
-    make_a_complete_search(
-        [1.0, 0, 0, 0, 0],
-        scheme_1(),
-        ("machine", "recycler", "machine"),
-        [
-            get_q_list(4, tier, q, False),
-            get_q_list_Ponly(4, tier, q, False),
-            get_q_list_Qonly(4, tier, q, False),
-        ],
-        q_level_list=[0, 1, 2, 3, 4],
-        filename="out_machine_{}.csv".format(q),
-    )
-    make_a_complete_search(
-        [1.0, 0, 0, 0, 0],
-        scheme_1(),
-        ("    EMP", "recycler", "EMP"),
-        [
-            get_q_list(5, tier, q, True),
-            get_q_list_Ponly(5, tier, q, True),
-            get_q_list_Qonly(4, tier, q, False),
-        ],
-        q_level_list=[0, 1, 2, 3, 4],
-        filename="out_EMP_{}.csv".format(q),
-    )
+    print("assembly machine")
+    print()
+    for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
+        print("==================")
+        print(q)
+        make_a_complete_search(
+            [1.0, 0, 0, 0, 0],
+            scheme_1(),
+            ("machine", "machine", "recycler"),
+            [
+                get_q_list(4, tier, q, False),
+                get_q_list_Ponly(4, tier, q, False),
+                get_q_list_Qonly(4, tier, q, False),
+            ],
+            q_level_list=[0, 1, 2, 3, 4],
+            filename="out_machine_{}.csv".format(q),
+        )
+        make_a_complete_search(
+            [1.0, 0, 0, 0, 0],
+            scheme_1(),
+            ("    EMP", "    EMP", "recycler"),
+            [
+                get_q_list(5, tier, q, True),
+                get_q_list_Ponly(5, tier, q, True),
+                get_q_list_Qonly(4, tier, q, False),
+            ],
+            q_level_list=[0, 1, 2, 3, 4],
+            filename="out_EMP_{}.csv".format(q),
+        )
 
+    # q = "Normal"
+    # q = "Legendary"
+    # q = "Rare"
+    # get_the_ratio_v2(
+    #     [1, 0, 0, 0, 0],
+    #     scheme_11(),
+    #     4,
+    #     (
+    #         new_q(0, "T3", q, 4, "T3", q, False, False),
+    #         new_q(4, "T3", q, 0, "T3", q, False, False),
+    #         new_q(4, "T3", q, 0, "T3", q, False, False),
+    #         new_q(4, "T3", q, 0, "T3", q, False, False),
+    #         new_q(0, "T3", q, 4, "T3", q, False, False),
+    #         new_q(4, "T3", q, 0, "T3", q, False, False),
+    #     ),
+    #     True,
+    # )
 
-# print()
-# print("==================")
-# print("drill -> furn -> GC (iron only)")
-# print()
-# for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
-#     make_a_complete_search(
-#         [1.0, 0, 0, 0, 0],
-#         scheme_4(),
-#         ("drill", "furn1", "furn2", "machGC1", "machGC2", "machT11", "rec", "machT12"),
-#         [
-#             get_q_list_Qonly(3, "T3", q, False),  # drill
-#             get_q_list(2, "T3", q, False),  # furn1
-#             get_q_list_Ponly(2, "T3", q, False),  # furn2
-#             get_q_list(4, "T3", q, False),  # ass GC1
-#             get_q_list_Ponly(4, "T3", q, False),  # ass GC2
-#             get_q_list_Qonly(4, "T3", q, False),  # T1
-#             get_q_list_Qonly(4, "T3", q, False),  # recycler
-#             get_q_list_Qonly(4, "T3", q, False),  # T1
-#         ],
-#         q_level_list=[0, 2],
-#         filename="out_{}.csv".format(q),
-#     )
+    # tier = "T3"
+    # print()
+    # print("==================")
+    # print("assembly machine")
+    # print()
+    # for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
+    #     print("==================")
+    #     print(q)
+    #     make_a_complete_search(
+    #         [1.0, 0, 0, 0, 0],
+    #         scheme_11(),
+    #         ("machine", "machine", "machine", "machine", "machine", "recycler"),
+    #         [
+    #             get_q_list(4, tier, q, False),
+    #             get_q_list(4, tier, q, False),
+    #             get_q_list(4, tier, q, False),
+    #             get_q_list(4, tier, q, False),
+    #             get_q_list_Ponly(4, tier, q, False),
+    #             get_q_list_Qonly(4, tier, q, False),
+    #         ],
+    #         q_level_list=[0, 1, 2, 3, 4],
+    #         filename="out_machine_{}.csv".format(q),
+    #     )
+    #     make_a_complete_search(
+    #         [1.0, 0, 0, 0, 0],
+    #         scheme_11(),
+    #         ("machine", "machine", "machine", "machine", "machine", "recycler"),
+    #         [
+    #             get_q_list(5, tier, q, True),
+    #             get_q_list(5, tier, q, True),
+    #             get_q_list(5, tier, q, True),
+    #             get_q_list(5, tier, q, True),
+    #             get_q_list_Ponly(5, tier, q, True),
+    #             get_q_list_Qonly(4, tier, q, False),
+    #         ],
+    #         q_level_list=[0, 1, 2, 3, 4],
+    #         filename="out_EMP_{}.csv".format(q),
+    #     )
 
+    # print()
+    # print("==================")
+    # print("drill -> furn -> GC (iron only)")
+    # print()
+    # for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
+    #     make_a_complete_search(
+    #         [1.0, 0, 0, 0, 0],
+    #         scheme_4(),
+    #         ("drill", "furn1", "furn2", "machGC1", "machGC2", "machT11", "rec", "machT12"),
+    #         [
+    #             get_q_list_Qonly(3, "T3", q, False),  # drill
+    #             get_q_list(2, "T3", q, False),  # furn1
+    #             get_q_list_Ponly(2, "T3", q, False),  # furn2
+    #             get_q_list(4, "T3", q, False),  # ass GC1
+    #             get_q_list_Ponly(4, "T3", q, False),  # ass GC2
+    #             get_q_list_Qonly(4, "T3", q, False),  # T1
+    #             get_q_list_Qonly(4, "T3", q, False),  # recycler
+    #             get_q_list_Qonly(4, "T3", q, False),  # T1
+    #         ],
+    #         q_level_list=[0, 2],
+    #         filename="out_{}.csv".format(q),
+    #     )
 
-# q = "Legendary"
-# print()
-# print("==================")
-# print("drill -> furn -> GC (iron only)")
-# print()
-# make_a_complete_search(
-#     [1.0, 0, 0, 0, 0],
-#     scheme_3(),
-#     ("drill", "furn1", "furn2", "EMP", "rec", "EMP"),
-#     [
-#         get_q_list_Qonly(3, "T3", q, False),  # drill
-#         get_q_list(2, "T3", q, False),  # furn1
-#         get_q_list_Ponly(2, "T3", q, False),  # furn2
-#         get_q_list(5, "T3", q, True),  # ass GC
-#         get_q_list_Qonly(4, "T3", q, False),  # recycler
-#         get_q_list_Ponly(5, "T3", q, True),  # ass GC
-#     ],
-#     q_level_list=[4],
-# )
+    # q = "Legendary"
+    # print()
+    # print("==================")
+    # print("drill -> furn -> GC (iron only)")
+    # print()
+    # make_a_complete_search(
+    #     [1.0, 0, 0, 0, 0],
+    #     scheme_3(),
+    #     ("drill", "furn1", "furn2", "EMP", "rec", "EMP"),
+    #     [
+    #         get_q_list_Qonly(3, "T3", q, False),  # drill
+    #         get_q_list(2, "T3", q, False),  # furn1
+    #         get_q_list_Ponly(2, "T3", q, False),  # furn2
+    #         get_q_list(5, "T3", q, True),  # ass GC
+    #         get_q_list_Qonly(4, "T3", q, False),  # recycler
+    #         get_q_list_Ponly(5, "T3", q, True),  # ass GC
+    #     ],
+    #     q_level_list=[4],
+    # )
 
-# make_a_complete_search(
-#     get_q_list(5, "T3", "Legendary", True),
-#     get_q_list_Qonly(4, "T3", "Legendary", False),
-# )
+    # make_a_complete_search(
+    #     get_q_list(5, "T3", "Legendary", True),
+    #     get_q_list_Qonly(4, "T3", "Legendary", False),
+    # )
 
+    # print()
+    # print("==================")
+    # print(new_q(3, "T3", "Normal", 0, "", "", False))
 
-# print()
-# print("==================")
-# print(new_q(3, "T3", "Normal", 0, "", "", False))
+    q0 = new_q(0, "T3", q, 4, "T3", q, False, False)
+    q1 = new_q(4, "T3", q, 0, "T3", q, False, False)
 
-# q = "Normal"
-# q = "Rare"
-# get_the_ratio_v2(
-#     [1, 0, 0, 0, 0],
-#     scheme_2(),
-#     4,
-#     (
-#         new_q(3, "T3", q, 0, "", "", False, False),
-#         new_q(2, "T3", q, 0, "", "", False, False),
-#         new_q(4, "T3", q, 0, "", "", False, False),
-#         new_q(0, "", "", 2, "T3", q, False, False),
-#         new_q(0, "", "", 4, "T3", q, False, False),
-#     ),
-#     True,
-#     log=False,
-# )
+    def print_c(q):
+        for i in range(len(q)):
+            print("{ ", end="")
+            for j in range(len(q[i])):
+                print("{:25.22f}".format(q[i][j]), end="L, ")
+            print("},")
+        print()
 
-print()
-print("==================")
-print("The calculation is finished")
-print()
+    print_c(q0["matrix"])
+    print_c(q1["matrix"])
+
+    print()
+    print("==================")
+    print("The calculation is finished")
+    print()
