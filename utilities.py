@@ -14,6 +14,11 @@ def print_q(a):
     print_line("q5", q[4])
 
 
+def print_mat5x5(a):
+    for i in range(len(a)):
+        print_line("q{}".format(i), a[i])
+
+
 ######################################
 #
 # main
