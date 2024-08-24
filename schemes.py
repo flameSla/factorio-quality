@@ -40,7 +40,7 @@ class scheme:
         result += mul_q(inp * self.mask_out, q2)
         return result
 
-
+debug = True
 # ====================================
 class scheme_1(scheme):
     """assembly machine + recycler"""
@@ -58,12 +58,53 @@ class scheme_1(scheme):
         # feedback = (x0 + feedback) * k
         # feedback = x0 * k + feedback * k
         # feedback * (1 - k)= x0 * k
+        if debug:
+            print()
+            print('==================')
+            print("q_mask_recycler:")
+            print_mat5x5(self.q_mask_recycler)
+            print()
+            print_mat5x5(self.q_mask_recycler.transpose())
+        
+        
         q = np.concatenate(
             (q_list[0]["matrix"][:][:q_level], q_list[1]["matrix"][:][q_level:])
         )
+        if debug:
+            print()
+            print('==================')
+            print("q:")
+            print_mat5x5(q)
+            print()
+            print_mat5x5(q.transpose())
+        
+        if debug:
+            print()
+            print('==================')
+            print("(q * self.q_mask_recycler * 0.25):")
+            print_mat5x5((q * self.q_mask_recycler * 0.25))
+            print()
+            print_mat5x5((q * self.q_mask_recycler * 0.25).transpose())
+
 
         k = (q * self.q_mask_recycler * 0.25).dot(q_list[2]["matrix"])
+        if debug:
+            print()
+            print('==================')
+            print("k:")
+            print_mat5x5(k)
+            print()
+            print_mat5x5(k.transpose())
+
         obr = np.linalg.inv(identity_matrix - k)
+        if debug:
+            print()
+            print('==================')
+            print("obr:")
+            print_mat5x5(obr)
+            print()
+            print_mat5x5(obr.transpose())
+
         self.feedback = mul_q(mul_q(x0, k), obr)
         self.x1 = x0 + self.feedback  # feedback
         self.x2 = self.machine(
