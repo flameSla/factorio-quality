@@ -1,5 +1,7 @@
 import numpy as np
 from utilities import print_q
+from utilities import print_line
+from utilities import print_mat5x5
 
 quality = {
     "Normal": 1.0,
@@ -209,3 +211,22 @@ if __name__ == "__main__":
     # print(a)
     # print(a[1:])
     # print(sum(a[1:]))
+
+    q = new_q(4, "T3", q, 0, "T3", q, False, False)
+
+    print()
+    print('==================')
+    print('q')
+    print(q["matrix"])
+
+    m = mul_q([1, 2, 3, 4, 5], q["matrix"])
+    print('q.dot(1,2,3,4,5)')
+    print('m = ', type(m), m)
+    
+    obr = np.linalg.inv(q["matrix"])
+    print('obr(q)')
+    print(obr)
+
+
+
+    print(obr.dot(q["matrix"]))
