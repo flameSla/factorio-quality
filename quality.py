@@ -149,38 +149,38 @@ if __name__ == "__main__":
     # q = "Epic"
     # q = "Legendary"
 
-    tier = "T3"
-    print()
-    print("==================")
-    print("assembly machine")
-    print()
-    for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
-        print("==================")
-        print(q)
-        make_a_complete_search(
-            [1.0, 0, 0, 0, 0],
-            scheme_1(),
-            ("machine", "machine", "recycler"),
-            [
-                get_q_list(4, tier, q, False),
-                get_q_list_Ponly(4, tier, q, False),
-                get_q_list_Qonly(4, tier, q, False),
-            ],
-            q_level_list=[0, 1, 2, 3, 4],
-            filename="out_machine_{}.csv".format(q),
-        )
-        make_a_complete_search(
-            [1.0, 0, 0, 0, 0],
-            scheme_1(),
-            ("    EMP", "    EMP", "recycler"),
-            [
-                get_q_list(5, tier, q, True),
-                get_q_list_Ponly(5, tier, q, True),
-                get_q_list_Qonly(4, tier, q, False),
-            ],
-            q_level_list=[0, 1, 2, 3, 4],
-            filename="out_EMP_{}.csv".format(q),
-        )
+    # tier = "T3"
+    # print()
+    # print("==================")
+    # print("assembly machine")
+    # print()
+    # for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
+    #     print("==================")
+    #     print(q)
+    #     make_a_complete_search(
+    #         [1.0, 0, 0, 0, 0],
+    #         scheme_1(),
+    #         ("machine", "machine", "recycler"),
+    #         [
+    #             get_q_list(4, tier, q, False),
+    #             get_q_list_Ponly(4, tier, q, False),
+    #             get_q_list_Qonly(4, tier, q, False),
+    #         ],
+    #         q_level_list=[0, 1, 2, 3, 4],
+    #         filename="out_machine_{}.csv".format(q),
+    #     )
+    #     make_a_complete_search(
+    #         [1.0, 0, 0, 0, 0],
+    #         scheme_1(),
+    #         ("    EMP", "    EMP", "recycler"),
+    #         [
+    #             get_q_list(5, tier, q, True),
+    #             get_q_list_Ponly(5, tier, q, True),
+    #             get_q_list_Qonly(4, tier, q, False),
+    #         ],
+    #         q_level_list=[0, 1, 2, 3, 4],
+    #         filename="out_EMP_{}.csv".format(q),
+    #     )
 
     # q = "Normal"
     # q = "Legendary"
@@ -291,6 +291,7 @@ if __name__ == "__main__":
     # print("==================")
     # print(new_q(3, "T3", "Normal", 0, "", "", False))
 
+    q = "Normal" 
     q0 = new_q(0, "T3", q, 4, "T3", q, False, False)
     q1 = new_q(4, "T3", q, 0, "T3", q, False, False)
 
@@ -304,6 +305,28 @@ if __name__ == "__main__":
 
     print_c(q0["matrix"])
     print_c(q1["matrix"])
+
+    # отладка матриц в с++
+    # get_q_list(4, tier, q, False),
+    # get_q_list_Ponly(4, tier, q, False),
+    # get_q_list_Qonly(4, tier, q, False),
+    q = "Normal"
+    q = "Legendary"
+    q = "Rare"
+    q = "Normal"    
+    get_the_ratio_v2(
+        [1, 0, 0, 0, 0],
+        scheme_1(),
+        4,
+        (
+            new_q(4, "T3", q, 0, "T3", q, False, False),
+            new_q(0, "T3", q, 4, "T3", q, False, False),
+            new_q(4, "T3", q, 0, "T3", q, False, False),
+        ),
+        True,
+    )
+
+
 
     print()
     print("==================")
