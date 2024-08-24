@@ -145,60 +145,65 @@ def make_a_complete_search(
     return min_res
 
 
-print()
-print("==================")
-print("assembly machine")
-print()
-for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
+######################################
+#
+# main
+if __name__ == "__main__":
+
+    print()
     print("==================")
-    print(q)
-    make_a_complete_search(
-        [1.0, 0, 0, 0, 0],
-        scheme_1(),
-        ("machine", "recycler", "machine"),
-        [
-            get_q_list(4, "T3", q, False),
-            get_q_list_Qonly(4, "T3", q, False),
-            get_q_list_Ponly(4, "T3", q, False),
-        ],
-        q_level_list=[0, 1, 2, 3, 4],
-        filename="out_machine_{}.csv".format(q),
-    )
-    make_a_complete_search(
-        [1.0, 0, 0, 0, 0],
-        scheme_1(),
-        ("    EMP", "recycler", "EMP"),
-        [
-            get_q_list(5, "T3", q, True),
-            get_q_list_Qonly(4, "T3", q, False),
-            get_q_list_Ponly(5, "T3", q, True),
-        ],
-        q_level_list=[0, 1, 2, 3, 4],
-        filename="out_EMP_{}.csv".format(q),
-    )
+    print("assembly machine")
+    print()
+    for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
+        print("==================")
+        print(q)
+        make_a_complete_search(
+            [1.0, 0, 0, 0, 0],
+            scheme_1(),
+            ("machine", "recycler", "machine"),
+            [
+                get_q_list(4, "T3", q, False),
+                get_q_list_Qonly(4, "T3", q, False),
+                get_q_list_Ponly(4, "T3", q, False),
+            ],
+            q_level_list=[0, 1, 2, 3, 4],
+            filename="out_machine_{}.csv".format(q),
+        )
+        make_a_complete_search(
+            [1.0, 0, 0, 0, 0],
+            scheme_1(),
+            ("    EMP", "recycler", "EMP"),
+            [
+                get_q_list(5, "T3", q, True),
+                get_q_list_Qonly(4, "T3", q, False),
+                get_q_list_Ponly(5, "T3", q, True),
+            ],
+            q_level_list=[0, 1, 2, 3, 4],
+            filename="out_EMP_{}.csv".format(q),
+        )
 
-# print()
-# print("==================")
-# print(new_q(3, "T3", "Normal", 0, "", "", False))
+    # print()
+    # print("==================")
+    # print(new_q(3, "T3", "Normal", 0, "", "", False))
 
-# q = "Normal"
-# q = "Rare"
-# get_the_ratio_v2(
-#     [1, 0, 0, 0, 0],
-#     scheme_2(),
-#     4,
-#     (
-#         new_q(3, "T3", q, 0, "", "", False, False),
-#         new_q(2, "T3", q, 0, "", "", False, False),
-#         new_q(4, "T3", q, 0, "", "", False, False),
-#         new_q(0, "", "", 2, "T3", q, False, False),
-#         new_q(0, "", "", 4, "T3", q, False, False),
-#     ),
-#     True,
-#     log=False,
-# )
+    # q = "Normal"
+    # q = "Rare"
+    # get_the_ratio_v2(
+    #     [1, 0, 0, 0, 0],
+    #     scheme_2(),
+    #     4,
+    #     (
+    #         new_q(3, "T3", q, 0, "", "", False, False),
+    #         new_q(2, "T3", q, 0, "", "", False, False),
+    #         new_q(4, "T3", q, 0, "", "", False, False),
+    #         new_q(0, "", "", 2, "T3", q, False, False),
+    #         new_q(0, "", "", 4, "T3", q, False, False),
+    #     ),
+    #     True,
+    #     log=False,
+    # )
 
-print()
-print("==================")
-print("The calculation is finished")
-print()
+    print()
+    print("==================")
+    print("The calculation is finished")
+    print()
