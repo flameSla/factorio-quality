@@ -154,7 +154,7 @@ if __name__ == "__main__":
     print("==================")
     print("assembly machine")
     print()
-    prod_bonus = 200.0
+    prod_bonus = 000.0
     for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
         print("==================")
         print(q)
