@@ -154,6 +154,7 @@ if __name__ == "__main__":
     print("==================")
     print("assembly machine")
     print()
+    prod_bonus = 200.0
     for q in ("Normal", "Uncommon", "Rare", "Epic", "Legendary"):
         print("==================")
         print(q)
@@ -162,9 +163,9 @@ if __name__ == "__main__":
             scheme_1(),
             ("machine", "recycler", "machine"),
             [
-                get_q_list(4, "T3", q, False),
-                get_q_list_Qonly(4, "T3", q, False),
-                get_q_list_Ponly(4, "T3", q, False),
+                get_q_list(4, "T3", q, prod_bonus),
+                get_q_list_Qonly(4, "T3", q, 0.0),
+                get_q_list_Ponly(4, "T3", q, prod_bonus),
             ],
             q_level_list=[0, 1, 2, 3, 4],
             filename="out_machine_{}.csv".format(q),
@@ -174,9 +175,9 @@ if __name__ == "__main__":
             scheme_1(),
             ("    EMP", "recycler", "EMP"),
             [
-                get_q_list(5, "T3", q, True),
-                get_q_list_Qonly(4, "T3", q, False),
-                get_q_list_Ponly(5, "T3", q, True),
+                get_q_list(5, "T3", q, prod_bonus + 50.0),
+                get_q_list_Qonly(4, "T3", q, 0.0),
+                get_q_list_Ponly(5, "T3", q, prod_bonus + 50.0),
             ],
             q_level_list=[0, 1, 2, 3, 4],
             filename="out_EMP_{}.csv".format(q),
