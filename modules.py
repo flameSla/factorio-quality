@@ -1,4 +1,6 @@
 import numpy as np
+from utilities import print_q
+from utilities import print_line
 
 quality = {
     "Normal": 1.0,
@@ -8,7 +10,7 @@ quality = {
     "Legendary": 2.50,
 }
 
-quality_tiers = {"T1": 0.0, "T2": 0.0, "T3": 2.5}  # data for T0, T1 are unknown
+quality_tiers = {"T1": 1.0, "T2": 2.0, "T3": 2.5}
 productivity_tiers = {"T1": 4.0, "T2": 6.0, "T3": 10.0}
 speed_tiers = {"T1": 20.0, "T2": 30.0, "T3": 50.0}
 
@@ -25,16 +27,12 @@ def mul_q(inp, q):
         raise Exception("len(inp) != 5")
 
     if len(q) != 5 or len(q[0]) != 5:
+        print_q(q)
+        print(len(q))
+        print(len(q[0]))
         raise Exception("len(q) != 5")
 
-    res = [0, 0, 0, 0, 0]
-    tq = np.transpose(q)
-
-    for i in range(5):
-        res[i] = sum(inp * tq[i])
-
-    # print_line("res = ", res)
-    return np.array(res, dtype="float64")
+    return q.transpose().dot(inp)
 
 
 # constructor for the quality/productivity matrix
@@ -45,7 +43,7 @@ def new_q(
     productivity_amount,
     productivity_tier,
     productivity_quality,
-    additional50percent,
+    Percentage_of_productivity_bonus,
     full_name,
 ):
     Qinp = 0
@@ -73,8 +71,15 @@ def new_q(
             productivity_quality[:3],
         )
 
-    if additional50percent:
-        Pinp += 0.5
+    if isinstance(Percentage_of_productivity_bonus, float):
+        Percentage_of_productivity_bonus = min(Percentage_of_productivity_bonus, 300.0)
+        Percentage_of_productivity_bonus = max(Percentage_of_productivity_bonus, 0.0)
+        Pinp += Percentage_of_productivity_bonus / 100.0
+        Pinp = min(Pinp, 4.0)
+    else:
+        raise Exception(
+            "Percentage_of_productivity_bonus - the type of the variable must be float"
+        )
 
     if full_name:
         text = "{}: {:<23s}".format(
@@ -120,7 +125,7 @@ def new_q(
 
 
 # ====================================
-def get_q_list(number_of_modules, tier, q_quality, additional50percent):
+def get_q_list(number_of_modules, tier, q_quality, Percentage_of_productivity_bonus):
     q_list = []
     for q in range(0, number_of_modules + 1):
         for p in range(0, number_of_modules + 1):
@@ -133,7 +138,7 @@ def get_q_list(number_of_modules, tier, q_quality, additional50percent):
                         p,
                         tier,
                         q_quality,
-                        additional50percent,
+                        Percentage_of_productivity_bonus,
                         True,
                     )
                 )
@@ -141,20 +146,47 @@ def get_q_list(number_of_modules, tier, q_quality, additional50percent):
 
 
 # ====================================
-def get_q_list_Qonly(number_of_modules, tier, q_quality, additional50percent):
+def get_q_list_Qonly(
+    number_of_modules, tier, q_quality, Percentage_of_productivity_bonus
+):
     q_list = []
-    q_list.append(new_q(0, "", "", 0, "", "", additional50percent, False))
+    # for q in range(0, number_of_modules + 1):
+    #     q_list.append(new_q(q, tier, q_quality, 0, "", "", Percentage_of_productivity_bonus, False))
+
+    q_list.append(new_q(0, "", "", 0, "", "", Percentage_of_productivity_bonus, False))
     q_list.append(
-        new_q(number_of_modules, tier, q_quality, 0, "", "", additional50percent, False)
+        new_q(
+            number_of_modules,
+            tier,
+            q_quality,
+            0,
+            "",
+            "",
+            Percentage_of_productivity_bonus,
+            False,
+        )
     )
     return q_list
 
 
 # ====================================
-def get_q_list_Ponly(number_of_modules, tier, q_quality, additional50percent):
+def get_q_list_Ponly(
+    number_of_modules, tier, q_quality, Percentage_of_productivity_bonus
+):
     q_list = []
+    # for p in range(0, number_of_modules + 1):
+    #     q_list.append(new_q(0, "", "", p, tier, q_quality, Percentage_of_productivity_bonus, False))
     q_list.append(
-        new_q(0, "", "", number_of_modules, tier, q_quality, additional50percent, False)
+        new_q(
+            0,
+            "",
+            "",
+            number_of_modules,
+            tier,
+            q_quality,
+            Percentage_of_productivity_bonus,
+            False,
+        )
     )
     return q_list
 
@@ -169,41 +201,3 @@ if __name__ == "__main__":
         if hasattr(obj, "__class__") and obj.__class__.__name__ == "function"
     ]
     print(func_list)
-
-    for t in ("T1", "T2", "T3"):
-        print("====================================")
-        for q in quality.keys():
-            print("{} {:15s} = {:10.2f}".format(t, q, speed_tiers[t] * quality[q]))
-
-    print()
-    print("==================")
-    print("cost_of_production")
-    print()
-
-    print(
-        "T3 / T1 = {:10.2f}".format(
-            cost_of_production["Normal"]["T3"] / cost_of_production["Normal"]["T1"]
-        )
-    )
-    print(
-        "T3 / T2 = {:10.2f}".format(
-            cost_of_production["Normal"]["T3"] / cost_of_production["Normal"]["T2"]
-        )
-    )
-    print(
-        "T2 / T1 = {:10.2f}".format(
-            cost_of_production["Normal"]["T2"] / cost_of_production["Normal"]["T1"]
-        )
-    )
-
-    # unverified information
-    # a = [
-    # 1 - 0.25,
-    # 1 * 0.9,
-    # 1 * 0.1 * 0.9,
-    # 1 * 0.1 * 0.1 * 0.9,
-    # 1 * 0.1 * 0.1 * 0.1,
-    # ]
-    # print(a)
-    # print(a[1:])
-    # print(sum(a[1:]))
